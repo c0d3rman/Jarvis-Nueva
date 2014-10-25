@@ -31,47 +31,51 @@ $(document).ready ->
 				$.ajax({
 					url: "https://api.wit.ai/message"
 					data:
-						'v': '20140501' #May 1st 2014
-						'q': command #encodeURIComponent(command)
+						'v': '20141001' #Oct 1st 2014
+						'q': command
 						'access_token': "HFJ5Y3XFVSEXQICMCUPICOJKO6IIBECQ"
 					dataType: "jsonp"
 					jsonp: "callback"
 					method: "POST"
 					timeout: 1000
 				}).done((data) ->
-					confidence = data.outcome.confidence
+					confidence = data.outcomes[0].confidence
 					if confidence > 0.6
 						window.jarvis.understand data
 					else
-						window.jarvis.actions._unknown()
+						window.jarvis.actions._unknown(window.jarvis)
 				).fail((jqXHR, textStatus, errorThrown) ->
 					console.log 'textStatus: ' + textStatus
 					console.log 'errorThrown: ' + errorThrown
 					console.log 'jqXHR: ' + jqXHR
-					if navigator.onLine
-						throw errorThrown
-					else
+					if not navigator.onLine
 						window.jarvis.talk "I can't connect to the internet", "Jarvis", "I cant connect to the internet"
+						throw errorThrown
+					else if textStatus is 'timeout'
+						@tryCount++
+						if @tryCount <= 3
+							$.ajax @
+						else
+							window.jarvis.talk "I'm having trouble connecting with my servers", "Jarvis", "I am having trouble connecting with my servers"
+					else
+						window.jarvis.failGracefully ->
+							throw errorThrown
 				)
 				
 		understand: (rawData) ->
 			this.failGracefully ->
-				intent = rawData.outcome.intent
-				data = rawData.outcome.entities
+				intent = rawData.outcomes[0].intent
+				data = rawData.outcomes[0].entities
 				(this.actions[intent] or this.actions._unknown)(this, data)
 		
 		actions:
-			hello:		(self, data) ->
+			hello:		(self) ->
 				greetings = ["Hello", "Hi", "Wazzap ma homie", "Hello sir", "Greetings"]
 				self.talk greetings[Math.floor(Math.random() * greetings.length)]
-			list:		(self, dataCatcher, callback) ->
+			list:		(self, data) ->
 				$.get("/resources/userMusic/", (data) ->
 					data = (data[i] = element.slice(0, -4).replace /_/g, " " for element, i in data.split "\n").slice 0, -1
-					if callback?
-						callback data
-						return
-					else
-						self.talk "I can play:<br>#{data.join "<br>"}"
+					self.talk "I can play:<br>#{data.join "<br>"}"
 				).fail ->
 					self.talk "Connect to the internet to play music"
 					
@@ -79,20 +83,23 @@ $(document).ready ->
 				self.player.pause()
 				self.talk "Pausing song"
 			play:		(self, data) ->
-				filename = data.song_name.value.replace(new RegExp(' ', 'g'), "_").toLowerCase() + ".mp3" #uses RegExp object to avoid leading whitespace regex division bug (#607 in GitHub)
+				songName = data.song_name[0].value
+				filename = songName.replace(new RegExp(' ', 'g'), "_").toLowerCase() + ".mp3" #uses RegExp object to avoid leading whitespace regex division bug (#607 in GitHub)
 				filepath = "/resources/userMusic/#{filename}"
 				$.get(filepath)
 					.done( ->
 						$(self.player).attr "src", filepath
 						self.player.play()
-						self.talk "Playing " + data.song_name.value
+						self.talk "Playing #{songName}"
 					).fail ->
 						self.player.pause()
-						self.talk "I don't have the song " + data.song_name.value
+						self.talk "I don't have the song #{songName}"
 			speak:		(self, data) ->
-				self.talk data.message_body.value
+				self.talk data.message_body[0].value
 			shuffle:	(self) ->
-					self.actions.list self, {}, (data) ->
+					$.get("/resources/userMusic/", (data) ->
+						data = (data[i] = element.slice(0, -4).replace /_/g, " " for element, i in data.split "\n").slice 0, -1
+						
 						#shuffle function from https://gist.github.com/ddgromit/859699
 						shuffle = (a) ->
 							i = a.length
@@ -103,7 +110,9 @@ $(document).ready ->
 								a[i] = t
 							a
 						data = shuffle data
-						self.actions.play self, {song_name: {value: data[0]}}
+						self.actions.play self, {song_name: [{value: data[0]}]}
+					).fail ->
+						self.talk "Connect to the internet to play music"
 			search:		(self, data) ->
 				engineHash =
 					"google": "https://www.google.com/search?q="
@@ -120,7 +129,7 @@ $(document).ready ->
 				self.player.play()
 				self.talk "Unpausing song"
 			calculate:	(self, data) ->
-				expression = data.math_expression.value
+				expression = data.math_expression[0].value
 				self.talk "Calculating #{expression}"
 				window.open "http://www.wolframalpha.com/input/?i=#{encodeURIComponent expression}", "_self"
 			help:		(self) ->
@@ -145,21 +154,38 @@ $(document).ready ->
 					else
 						0
 				if time < (new JarvisTimeRange sortedKeys[0]).startTime
-					nextClass = window.scheduleUtils.scheduleRaw.names[scheduleRawPart[sortedKeys[0]]]
+					className = window.scheduleUtils.scheduleRaw.names[scheduleRawPart[sortedKeys[0]]]
 				else
 					for key, i in sortedKeys
 						if (new JarvisTimeRange key).contains time
 							if scheduleRawPart[sortedKeys[i+1]] isnt 0
-								nextClass = window.scheduleUtils.scheduleRaw.names[scheduleRawPart[sortedKeys[i+1]]]
+								className = window.scheduleUtils.scheduleRaw.names[scheduleRawPart[sortedKeys[i+1]]]
 							else
-								nextClass = window.scheduleUtils.scheduleRaw.names[scheduleRawPart[sortedKeys[i+2]]]
+								className = window.scheduleUtils.scheduleRaw.names[scheduleRawPart[sortedKeys[i+2]]]
 							break
-				if nextClass?
-					self.talk "You have #{nextClass} next"
+				if className?
+					self.talk "You have #{className} next"
 				else if window.scheduleUtils.getCurrentClass()?
 					self.talk "This is your last class of the day"
 				else
 					self.talk "The day is over!"
+			class_time:	(self, data) ->
+				date = new Date data.datetime[0].value.from
+				day = date.getDay()
+				time = new JarvisTime "#{date.getHours()}:#{date.getMinutes()}"
+				className = window.scheduleUtils.getClassFromTime window.scheduleUtils.schedule, day, time.toString()
+				if className?
+					if day is new Date().getDay()
+						self.talk "You have #{className} at #{time.toFormattedString()}"
+					else
+						days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+						self.talk "You have #{className} at #{time.toFormattedString()} on #{days[day]}"
+				else
+					if day is new Date().getDay()
+						self.talk "You don't have a class at #{time.toFormattedString()}"
+					else
+						days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+						self.talk "You don't have a class at #{time.toFormattedString()} on #{days[day]}"
 			#internal actions
 			_unknown:	(self) ->
 				self.talk "I didn't understand that.", "Jarvis", "I did ent understand that"

@@ -16,6 +16,17 @@ class @JarvisTime
 	
 	toString: ->
 		"#{@hours}:" + (if @minutes < 10 then "0#{@minutes}" else "#{@minutes}")
+	toFormattedString: ->
+		string = @hours % 12 or 12
+		if 0 < @minutes < 10
+			string += ":0#{@minutes}"
+		else if 10 <= @minutes <= 60
+			string += ":#{@minutes}"
+		
+		if @hours is @hours % 12
+			string += " AM"
+		else
+			string += " PM"
 	valueOf: ->
 		@hours * 60 + @minutes
 
@@ -45,11 +56,11 @@ class @JarvisTimeRange
 window.scheduleUtils =
 	minuteByMinute: (timeRange) ->
 		unless timeRange.match /^\d{1,2}:\d{2}-\d{1,2}:\d{2}$/
-			throw Error("Bad input to minuteByMinute: #{timeRange}")
+			throw Error "Bad input to minuteByMinute: #{timeRange}"
 	
 		[startTime, endTime] = (new JarvisTime(time) for time in timeRange.split "-")
 		unless startTime < endTime
-			throw Error("Start time after end time in minuteByMinute: #{timeRange}")
+			throw Error "Start time after end time in minuteByMinute: #{timeRange}"
 	
 		output = []
 		for time in [startTime + 0..endTime - 1]
@@ -79,7 +90,7 @@ window.scheduleUtils =
 		schedule[day][time]
 
 	getCurrentTime: ->
-		#now = new Date()
+		now = new Date()
 		return [now.getDay(), new JarvisTime "#{now.getHours()}:#{now.getMinutes()}"]
 	
 	getCurrentClass: ->

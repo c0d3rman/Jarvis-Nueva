@@ -51,8 +51,8 @@ else
 	app.set 'view engine', 'coffee'
 	app.engine 'coffee', coffeecup.__express
 
-	app.use morgan stream: {write: (str) -> fs.appendFileSync "#{__dirname}/log/long.log", str}
-	app.use morgan format: "dev++", stream: {write: (str) -> fs.appendFileSync "#{__dirname}/log/short.log", str}
+	app.use morgan "combined", stream: {write: (str) -> fs.appendFileSync "#{__dirname}/log/long.log", str}
+	app.use morgan "dev++", stream: {write: (str) -> fs.appendFileSync "#{__dirname}/log/short.log", str}
 	app.use edt "Yo dawg, I heard you liked paths so I put paths in your paths so you can traverse paths while you're traversing paths.\n"
 	app.use coffeemiddleware src: "#{__dirname}/webroot"
 	app.use busboy limits: {fileSize: 20 * 1024 * 1024}
