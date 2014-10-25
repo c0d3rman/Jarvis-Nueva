@@ -12,7 +12,7 @@ $(document).ready ->
 	# add a method to submit the terminal
 	submitTerminal = ->
 		if $("#in").val() isnt ""
-			window.jarvis.talk $("#in").val(), "You"
+			window.jarvis.talk $("#in").val(), speaker: "You"
 			window.jarvis.process $("#in").val()
 			$("#in").val("")
 	
