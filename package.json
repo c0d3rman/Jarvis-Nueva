@@ -7,11 +7,9 @@
     "cluster": "^0.7.7",
     "coffee-middleware": "^0.2.1",
     "coffeecup": "^0.3.21",
-    "connect-busboy": "0.0.1",
-    "express": "^4.1.1",
+    "express": "^4.10.0",
     "express-directory-traversal": "^1.0.2",
-    "express-subdomains": "0.0.5",
-    "morgan": "^1.0.1",
+    "morgan": "^1.4.1",
     "serve-static": "^1.1.0",
     "stylus": "^0.45.1"
   },

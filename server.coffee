@@ -7,7 +7,6 @@ fs = require 'fs'
 path = require 'path'
 http = require 'http'
 https = require 'https'
-busboy = require 'connect-busboy'
 edt = require 'express-directory-traversal'
 cluster = require 'cluster'
 os = require 'os'
@@ -55,7 +54,6 @@ else
 	app.use morgan "dev++", stream: {write: (str) -> fs.appendFileSync "#{__dirname}/log/short.log", str}
 	app.use edt "Yo dawg, I heard you liked paths so I put paths in your paths so you can traverse paths while you're traversing paths.\n"
 	app.use coffeemiddleware src: "#{__dirname}/webroot"
-	app.use busboy limits: {fileSize: 20 * 1024 * 1024}
 	app.use servestatic "#{__dirname}/webroot"
 	
 	app.get '/', (req, res) ->
