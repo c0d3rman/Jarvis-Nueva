@@ -9,7 +9,9 @@ $(document).ready ->
 			tempObj
 		)()
 		# add a talk fuction to submit messages to terminal
-		talk: (message, speaker = "Jarvis", spoken) ->
+		talk: (message, {speaker, phonetic} = {}) ->
+			speaker ?= "Jarvis"
+			phonetic ?= message
 			$("#terminalContent").append speaker + ': ' + message + '<br><br>'
 			message = message
 				.replace(/\n|<br>|\\n/g, ', ')		# make newlines into pauses
@@ -18,7 +20,7 @@ $(document).ready ->
 			$(document).profanityFilter customSwears: this.swearWords
 			if speaker == "Jarvis"
 				if speechSynthesis?
-					message = new SpeechSynthesisUtterance (spoken or message)
+					message = new SpeechSynthesisUtterance phonetic
 					message.voice = speechSynthesis.getVoices().filter((voice) -> voice.name == 'Google UK English Male')[0]
 					message.lang = "en-GB"
 					
@@ -49,14 +51,14 @@ $(document).ready ->
 					console.log 'errorThrown: ' + errorThrown
 					console.log 'jqXHR: ' + jqXHR
 					if not navigator.onLine
-						window.jarvis.talk "I can't connect to the internet", "Jarvis", "I cant connect to the internet"
+						window.jarvis.talk "I can't connect to the internet", phonetic: "I cant connect to the internet"
 						throw errorThrown
 					else if textStatus is 'timeout'
 						@tryCount++
 						if @tryCount <= 3
 							$.ajax @
 						else
-							window.jarvis.talk "I'm having trouble connecting with my servers", "Jarvis", "I am having trouble connecting with my servers"
+							window.jarvis.talk "I'm having trouble connecting with my servers", phonetic: "I am having trouble connecting with my servers"
 					else
 						window.jarvis.failGracefully ->
 							throw errorThrown
@@ -176,19 +178,23 @@ $(document).ready ->
 				className = window.scheduleUtils.getClassFromTime window.scheduleUtils.schedule, day, time.toString()
 				if className?
 					if day is new Date().getDay()
-						self.talk "You have #{className} at #{time.toFormattedString()}"
+						self.talk "You have #{className} at #{time.toFormattedString()}", phonetic: "You have #{className} at #{time.toSpokenFormattedString()}"
 					else
 						days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-						self.talk "You have #{className} at #{time.toFormattedString()} on #{days[day]}"
+						self.talk "You have #{className} at #{time.toFormattedString()} on #{days[day]}", phonetic: "You have #{className} at #{time.toSpokenFormattedString()} on #{days[day]}"
 				else
 					if day is new Date().getDay()
-						self.talk "You don't have a class at #{time.toFormattedString()}"
+						self.talk "You don't have a class at #{time.toFormattedString()}", phonetic: "You don't have a class at #{time.toSpokenFormattedString()}"
 					else
 						days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-						self.talk "You don't have a class at #{time.toFormattedString()} on #{days[day]}"
+						self.talk "You don't have a class at #{time.toFormattedString()} on #{days[day]}", phonetic: "You don't have a class at #{time.toSpokenFormattedString()} on #{days[day]}"
+			time:		(self) ->
+				now = new Date()
+				now = new JarvisTime now
+				self.talk "The time is now #{now.toFormattedString()}", phonetic: "The time is now #{now.toSpokenFormattedString()}"
 			#internal actions
 			_unknown:	(self) ->
-				self.talk "I didn't understand that.", "Jarvis", "I did ent understand that"
+				self.talk "I didn't understand that.", phonetic: "I did ent understand that"
 			_disconnected: (self) ->
 				self.talk "I can't connect to the internet"
 		failGracefully: (todo) ->

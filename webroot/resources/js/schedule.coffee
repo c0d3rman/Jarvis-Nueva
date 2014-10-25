@@ -11,11 +11,16 @@ class @JarvisTime
 		else if time instanceof JarvisTime
 			@hours = time.hours
 			@minutes = time.minutes
+		else if time instanceof Date
+			@hours = time.getHours()
+			@minutes = time.getMinutes()
 		else
 			throw "Unknown input type (#{typeof time}) for input #{time}"
 	
 	toString: ->
 		"#{@hours}:" + (if @minutes < 10 then "0#{@minutes}" else "#{@minutes}")
+	toSpokenString: ->
+		"#{@hours} #{@minutes}"
 	toFormattedString: ->
 		string = @hours % 12 or 12
 		if 0 < @minutes < 10
@@ -27,6 +32,8 @@ class @JarvisTime
 			string += " AM"
 		else
 			string += " PM"
+	toSpokenFormattedString: ->
+		string = (@hours % 12 or 12) + " #{@minutes} " + (if @hours is @hours % 12 then "AM" else "PM")
 	valueOf: ->
 		@hours * 60 + @minutes
 
