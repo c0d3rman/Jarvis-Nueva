@@ -19,6 +19,8 @@
     "//": "",
     "CSL": "echo > log/short.log",
     "CLL": "echo > log/long.log",
-    "CEL": "echo > log/error.log"
+    "CEL": "echo > log/error.log",
+    "dev": "sudo chown ssh -R webroot/",
+    "prod": "sudo chown www-data -R webroot/"
   }
 }
