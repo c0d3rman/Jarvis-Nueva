@@ -97,8 +97,8 @@ window.scheduleUtils =
 		schedule[day][time]
 
 	getCurrentTime: ->
-		now = new Date()
-		return [now.getDay(), new JarvisTime "#{now.getHours()}:#{now.getMinutes()}"]
+		now = moment()
+		return [now.day(), new JarvisTime now.format "HH:mm"]
 	
 	getCurrentClass: ->
 		this.getClassFromTime this.schedule, this.getCurrentTime()...

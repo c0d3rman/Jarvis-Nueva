@@ -192,6 +192,9 @@ $(document).ready ->
 				now = new Date()
 				now = new JarvisTime now
 				self.talk "The time is now #{now.toFormattedString()}", phonetic: "The time is now #{now.toSpokenFormattedString()}"
+			day:		(self) ->
+				now = moment()
+				self.talk "Today is #{now.format 'dddd, MMMM Do'}"
 			#internal actions
 			_unknown:	(self) ->
 				self.talk "I didn't understand that.", phonetic: "I did ent understand that"
