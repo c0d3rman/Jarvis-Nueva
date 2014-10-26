@@ -14,13 +14,18 @@
     "stylus": "^0.45.1"
   },
   "scripts": {
-    "start": "nohup hotcoffee server.coffee 2>&1 >> log/error.log &",
-    "stop": "pgrep node | xargs --no-run-if-empty kill",
+    "start": "sudo nohup hotcoffee server.coffee 2>&1 >> log/error.log &",
+    "stop": "sudo pgrep node | sudo xargs --no-run-if-empty kill",
     "//": "",
     "CSL": "echo > log/short.log",
     "CLL": "echo > log/long.log",
     "CEL": "echo > log/error.log",
+    "VSL": "less -R log/short.log",
+    "VLL": "less -R log/long.log",
+    "VEL": "less -R log/error.log",
     "dev": "sudo chown ssh -R webroot/",
-    "prod": "sudo chown www-data -R webroot/"
+    "prod": "sudo chown www-data -R webroot/",
+    "cleanrestart": "npm run CEL > /dev/null; npm restart > /dev/null",
+    "cln": "npm run cleanrestart > /dev/null"
   }
 }
