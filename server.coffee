@@ -43,6 +43,8 @@ else
 	
 		fn tokens, req, res
 
+	errorHandler = (err, req, res, next) ->
+		res.send 500, 'Server error'
 
 	app = express()
 
@@ -55,6 +57,7 @@ else
 	app.use edt "Yo dawg, I heard you liked paths so I put paths in your paths so you can traverse paths while you're traversing paths.\n"
 	app.use coffeemiddleware src: "#{__dirname}/webroot"
 	app.use servestatic "#{__dirname}/webroot"
+	app.use errorHandler
 	
 	app.get '/', (req, res) ->
 		res.render 'index', empty: ''
