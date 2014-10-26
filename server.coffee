@@ -44,7 +44,7 @@ else
 		fn tokens, req, res
 
 	errorHandler = (err, req, res, next) ->
-		res.send 500, 'Server error'
+		res.status(500).send 'Server error'
 
 	app = express()
 
