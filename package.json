@@ -23,8 +23,6 @@
     "VSL": "less -R log/short.log",
     "VLL": "less -R log/long.log",
     "VEL": "less -R log/error.log",
-    "dev": "sudo chown ssh -R webroot/",
-    "prod": "sudo chown www-data -R webroot/",
     "cleanrestart": "npm run CEL > /dev/null; npm restart > /dev/null",
     "cln": "npm run cleanrestart > /dev/null"
   }
