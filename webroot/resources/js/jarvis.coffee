@@ -35,7 +35,7 @@ $(document).ready ->
 					data:
 						'v': '20141001' #Oct 1st 2014
 						'q': command
-						'access_token': "HFJ5Y3XFVSEXQICMCUPICOJKO6IIBECQ"
+						'access_token': "6BBRQXOFZ3PBUOEEZQYAJUXOHLUK3353"
 					dataType: "jsonp"
 					jsonp: "callback"
 					method: "POST"
@@ -195,6 +195,69 @@ $(document).ready ->
 			day:		(self) ->
 				now = moment()
 				self.talk "Today is #{now.format 'dddd, MMMM Do'}"
+			who:		(self) ->
+				self.talk "I am Jarvis, a smart personal assistant for Nueva students."
+			creator:	(self) ->
+				self.talk "I was created by Yoni Lerner."
+			class_end:	(self) ->
+				if window.scheduleUtils.getCurrentClass()?
+					[day, time] = window.scheduleUtils.getCurrentTime()
+					scheduleRawPart = window.scheduleUtils.scheduleRaw.schedule[day]
+					sortedKeys = Object.keys(scheduleRawPart).sort (a, b) ->
+						a = (new JarvisTimeRange a).startTime
+						b = (new JarvisTimeRange b).startTime
+						if a < b
+							-1
+						else if a > b
+							1
+						else
+							0
+					for key in sortedKeys
+						if (new JarvisTimeRange key).contains time
+							classTime = (new JarvisTimeRange key).endTime
+							break
+					classEnd = classTime - new JarvisTime new Date()
+					self.talk "Your class ends in #{classEnd} minutes"
+				else
+					self.talk "You don't have a class right now"
+			class_ordinal:	(self, data) ->
+				date = if data.datetime? then new Date data.datetime[0].value.from else new Date()
+				day = date.getDay()
+				scheduleRawPart = window.scheduleUtils.scheduleRaw.schedule[day]
+				sortedKeys = Object.keys(scheduleRawPart).sort (a, b) ->
+					a = (new JarvisTimeRange a).startTime
+					b = (new JarvisTimeRange b).startTime
+					if a < b
+						-1
+					else if a > b
+						1
+					else
+						0
+				.filter (key) ->
+						window.scheduleUtils.scheduleRaw.names[scheduleRawPart[key]] in ["Block 1", "Block 2", "Block 3", "Block 4", "Block 5", "Block 6", "Block 7", "Elective A", "Elective B", "Upper School Meeting", "Advisory", "Meetings"]
+				if data.ordinal?
+					ordinal = data.ordinal?[0].value
+				else if data.last?
+					sortedKeys.length
+				else
+					1
+				className = window.scheduleUtils.scheduleRaw.names[scheduleRawPart[sortedKeys[ordinal - 1]]]
+				getOrdinal = (n) -> #from https://ecommerce.shopify.com/c/ecommerce-design/t/ordinal-number-in-javascript-1st-2nd-3rd-4th-29259
+					s = ["th", "st", "nd", "rd"]
+					v = n % 100
+					n + (s[(v - 20) % 10] || s[v] || s[0])
+				if className?
+					if day is new Date().getDay()
+						self.talk "You have #{className} #{getOrdinal ordinal}"
+					else
+						days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+						self.talk "You have #{className} #{getOrdinal ordinal} on #{days[day]}"
+				else
+					if day is new Date().getDay()
+						self.talk "You only have #{sortedKeys.length} classes today"
+					else
+						days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+						self.talk "You only have #{sortedKeys.length} classes on #{days[day]}"
 			#internal actions
 			_unknown:	(self) ->
 				self.talk "I didn't understand that.", phonetic: "I did ent understand that"
