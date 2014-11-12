@@ -35,7 +35,7 @@ $(document).ready ->
 					data:
 						'v': '20141001' #Oct 1st 2014
 						'q': command
-						'access_token': "6BBRQXOFZ3PBUOEEZQYAJUXOHLUK3353"
+						'access_token': "HFJ5Y3XFVSEXQICMCUPICOJKO6IIBECQ"
 					dataType: "jsonp"
 					jsonp: "callback"
 					method: "POST"
