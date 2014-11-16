@@ -70,7 +70,8 @@ body {
   text-align: left; }
 
 #terminalContent {
-  margin: 0; }
+  margin: 0;
+  white-space: pre-line; }
 
 #in {
   background-color: transparent;

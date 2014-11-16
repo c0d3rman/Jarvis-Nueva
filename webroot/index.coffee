@@ -20,6 +20,7 @@ html ->
 		script src: '/resources/lib/annyang.js'
 		script src: '/resources/lib/profanity.js'
 		script src: '/resources/lib/moment.min.js'
+		script src: '/resources/lib/jquery.xdomainajax.js'
 
 		script src: '/resources/js/jarvis.js'
 		script src: '/resources/js/script.js'
