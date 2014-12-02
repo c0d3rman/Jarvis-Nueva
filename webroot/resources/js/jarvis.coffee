@@ -11,10 +11,10 @@ $(document).ready ->
 		# add a talk fuction to submit messages to terminal
 		talk: (message, {speaker, phonetic} = {}) ->
 			this.failGracefully ->
-				speaker ?= "Jarvis" 					# speaker default is "Jarvis"
+				speaker ?= "Jarvis" 						# speaker default is "Jarvis"
 				message = message
-					.replace(/<(?:.|\n)*?>/gm, '')		# remove HTML
-					.replace /[^A-Z0-9!.?:;,\s-]/ig, ''	# zap gremlins
+					.replace(/<(?:.|\n)*?>/gm, '')			# remove HTML
+					.replace /[^A-Z0-9!.?:;,\s'"-]/ig, ''	# zap gremlins'
 				phonetic ?= message 			# phonetic default is the message
 			
 				phonetic = phonetic.split /\n/	# make new lines into their own utterances
@@ -273,28 +273,30 @@ $(document).ready ->
 						days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 						self.talk "You only have #{sortedKeys.length} classes on #{days[day]}"
 			lunch:		(self, data) ->
-				nolunch = -> self.talk "There is no lunch service today"
-				now = moment()
+				nolunch = -> self.talk "There is no lunch service"
+				now = moment(data?.datetime[0].value.from) or moment()
 				date = now.format "MM/DD/YY"
 				day = now.day()
 				
 				if day is 0 or day is 6
 					nolunch()
 				else
-					$.get("https://www.myschooldining.com/nueva/?cmd=menus&currDT=#{date}")
+					$.get("https://www.myschooldining.com/nueva/?cmd=menus&selloc=1294&currDT=#{date}")
 						.done((data) ->
-							smalldate = now.format "MM/DD" #format date like the titles
+							smalldate = now.format "M/D" #format date like the titles
 							html = data.results[0]
 							menutable = /.*(<table border="0" cellpadding="0">[\s\S]*?<\/table>).*/.exec(html)[0]	#pull out menu table
 							menu = $(menutable).find(".calendar-nav:contains(#{smalldate})").parent()				#get relevant day. Insecure, no alternative found
 							menu.find(".calendar-nav,br,p:has(a)").remove()											#remove title, line breaks, PDF link
 							menu.children().first().remove()														#remove "Lunch"
+							window.menu = menu
 							if menu.children().first().text() is "No Meal Service"									#check if there is meal service
 								nolunch()
 							else
-								dishes = menu.children('p').next()														#get first dish in every category
-								dishes = (dish.innerText.replace "» ", "" for dish in dishes)							#get dish texts and remove "» "
-								self.talk "The lunch dishes today are:\n" + dishes.join "\n"							#say dishes
+								dishes = menu.children('span')														#get all dishes in every category
+								dishes = (dish.innerText.replace "» ", "" for dish in dishes)						#get dish texts and remove "» "
+								dishes = dishes.filter (dish) -> not dish.match /of The Day|Gluten|Farm to Fork/i	#Filter soup of the day, gluten-free dishes, and veggie sides
+								self.talk "The lunch dishes are:\n" + dishes.join "\n"								#say dishes
 						).fail ->
 							self.actions._disconnected(self)
 				
