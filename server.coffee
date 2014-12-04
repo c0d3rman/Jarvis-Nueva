@@ -11,6 +11,8 @@ edt = require 'express-directory-traversal'
 cluster = require 'cluster'
 os = require 'os'
 
+eggs = require './eastereggs'
+
 
 numCPUs = os.cpus().length
 
@@ -72,6 +74,14 @@ else
 				res.writeHead 200, "Content-Type": "text/plain"
 				res.write "#{file}\n" for file in files
 				res.end()
+	app.get '/eastereggs/:egg', (req, res) ->
+		egg = req.params.egg
+			.toLowerCase()
+			.replace /[^a-z ]/g, ""
+		if eggs[egg]?
+			res.end eggs[egg]
+		else
+			res.end ""
 	app.get '*', (req, res) ->
 		relpath = "#{req.url.substr(1)}index"
 		filepath = "#{__dirname}/webroot#{req.url}index.coffee"
@@ -114,5 +124,5 @@ else
 		res.writeHead 301, "Content-Type": "text/plain", "Location": "https://#{req.headers.host + req.url}"
 		res.end()
 	httpsServer = https.createServer options, app
-	httpServer.listen 8000, localhost, wwwdata
-	httpsServer.listen 8080, localhost, wwwdata
+	httpServer.listen 80, localhost, wwwdata
+	httpsServer.listen 443, localhost, wwwdata

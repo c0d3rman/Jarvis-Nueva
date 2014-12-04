@@ -48,40 +48,41 @@ $(document).ready ->
 		
 		process: (command) ->
 			this.failGracefully ->
-				$.ajax({
-					url: "https://api.wit.ai/message"
-					data:
-						'v': '20141001' #Oct 1st 2014
-						'q': command
-						'access_token': "HFJ5Y3XFVSEXQICMCUPICOJKO6IIBECQ"
-					dataType: "jsonp"
-					jsonp: "callback"
-					method: "POST"
-					timeout: 1000
-				}).done((data) ->
-					confidence = data.outcomes[0].confidence
-					if confidence > 0.6
-						window.jarvis.understand data
-					else
-						window.jarvis.actions._unknown(window.jarvis)
-				).fail((jqXHR, textStatus, errorThrown) ->
-					console.log 'textStatus: ' + textStatus
-					console.log 'errorThrown: ' + errorThrown
-					console.log 'jqXHR: ' + jqXHR
-					if not navigator.onLine
-						window.jarvis.talk "I can't connect to the internet", phonetic: "I cant connect to the internet"
-						throw errorThrown
-					else if textStatus is 'timeout'
-						@tryCount++
-						if @tryCount <= 3
-							$.ajax @
+				this.actions._easteregg this, command, ->
+					$.ajax({
+						url: "https://api.wit.ai/message"
+						data:
+							'v': '20141001' #Oct 1st 2014
+							'q': command
+							'access_token': "HFJ5Y3XFVSEXQICMCUPICOJKO6IIBECQ"
+						dataType: "jsonp"
+						jsonp: "callback"
+						method: "POST"
+						timeout: 1000
+					}).done((data) ->
+						confidence = data.outcomes[0].confidence
+						if confidence > 0.6
+							window.jarvis.understand data
 						else
-							mixpanel.track "timeout"
-							window.jarvis.talk "I'm having trouble connecting with my servers", phonetic: "I am having trouble connecting with my servers"
-					else
-						window.jarvis.failGracefully ->
+							window.jarvis.actions._unknown(window.jarvis)
+					).fail((jqXHR, textStatus, errorThrown) ->
+						console.log 'textStatus: ' + textStatus
+						console.log 'errorThrown: ' + errorThrown
+						console.log 'jqXHR: ' + jqXHR
+						if not navigator.onLine
+							window.jarvis.talk "I can't connect to the internet", phonetic: "I cant connect to the internet"
 							throw errorThrown
-				)
+						else if textStatus is 'timeout'
+							@tryCount++
+							if @tryCount <= 3
+								$.ajax @
+							else
+								mixpanel.track "timeout"
+								window.jarvis.talk "I'm having trouble connecting with my servers", phonetic: "I am having trouble connecting with my servers"
+						else
+							window.jarvis.failGracefully ->
+								throw errorThrown
+					)
 				
 		understand: (rawData) ->
 			this.failGracefully ->
@@ -322,6 +323,14 @@ When does this class end?
 				self.talk "I didn't understand that.", phonetic: "I did ent understand that"
 			_disconnected: (self) ->
 				self.talk "I can't connect to the internet"
+			_easteregg: (self, egg, callback) ->
+				$.get "/eastereggs/#{egg}"
+					.done (response) ->
+						if response isnt ""
+							self.talk response
+						else
+							callback()
+					.fail callback
 		failGracefully: (todo) ->
 			try
 				todo.apply this
