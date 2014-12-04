@@ -149,7 +149,16 @@ $(document).ready ->
 				self.talk "Calculating #{expression}"
 				window.open "http://www.wolframalpha.com/input/?i=#{encodeURIComponent expression}", "_self"
 			help:		(self) ->
-				self.talk "You can say:\n" + (name for name, action of self.actions when name.charAt(0) isnt '_').join "\n"
+				#self.talk "You can say:\n" + (name for name, action of self.actions when name.charAt(0) isnt '_').join "\n"
+				self.talk """You can say:
+What class do I have now?
+What's the time?
+What is for lunch tomorrow?
+What day is it?
+Who are you?
+Who made you?
+When does this class end?
+"""
 			class_now:	(self) ->
 				#className = window.scheduleUtils.getClassFromTime window.scheduleUtils.schedule, data.datetime[0].value.from
 				className = window.scheduleUtils.getCurrentClass()
