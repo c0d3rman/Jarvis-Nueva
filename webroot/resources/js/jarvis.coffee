@@ -136,8 +136,8 @@ $(document).ready ->
 					"wolfram alpha": "http://www.wolframalpha.com/input/?i="
 				
 				query = data.search_query || data.wikipedia_search_query || data.wolfram_search_query
-				query = query.value
-				engine = data.search_engine.value || "google"
+				query = query[0].value
+				engine = data.search_engine?.value || "google"
 				window.open engineHash[engine.toLowerCase()] + encodeURIComponent(query), "_self"
 				
 				self.talk "Searching #{engine} for #{query}"
