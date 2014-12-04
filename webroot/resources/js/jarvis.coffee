@@ -18,8 +18,12 @@ $(document).ready ->
 				phonetic ?= message 			# phonetic default is the message
 			
 				phonetic = phonetic.split /\n/	# make new lines into their own utterances
-			
-				$("#terminalContent").append $("<p></p>").text(speaker + ': ' + message)
+				
+				uid = Math.floor(Math.random() * 100000)
+				$("#terminalContent").append $("<p></p>").text(speaker + ': ' + message).attr 'id', uid
+				setTimeout (id) ->
+					$("#" + id).fadeOut 1000, -> $(this).remove()
+				, 5000, uid
 				$(document).profanityFilter customSwears: this.swearWords
 				if speaker == "Jarvis"
 					if speechSynthesis?
@@ -211,17 +215,6 @@ When does this class end?
 					else
 						days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 						self.talk "You don't have a class at #{time.toFormattedString()} on #{days[day]}", phonetic: "You don't have a class at #{time.toSpokenFormattedString()} on #{days[day]}"
-			time:		(self) ->
-				now = new Date()
-				now = new JarvisTime now
-				self.talk "The time is now #{now.toFormattedString()}", phonetic: "The time is now #{now.toSpokenFormattedString()}"
-			day:		(self) ->
-				now = moment()
-				self.talk "Today is #{now.format 'dddd, MMMM Do'}"
-			who:		(self) ->
-				self.talk "I am Jarvis, a smart personal assistant for Nueva students."
-			creator:	(self) ->
-				self.talk "I was created by Yoni Lerner."
 			class_end:	(self) ->
 				if window.scheduleUtils.getCurrentClass()?
 					[day, time] = window.scheduleUtils.getCurrentTime()
@@ -281,6 +274,17 @@ When does this class end?
 					else
 						days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 						self.talk "You only have #{sortedKeys.length} classes on #{days[day]}"
+			time:		(self) ->
+				now = new Date()
+				now = new JarvisTime now
+				self.talk "The time is now #{now.toFormattedString()}", phonetic: "The time is now #{now.toSpokenFormattedString()}"
+			day:		(self) ->
+				now = moment()
+				self.talk "Today is #{now.format 'dddd, MMMM Do'}"
+			who:		(self) ->
+				self.talk "I am Jarvis, a smart personal assistant for Nueva students."
+			creator:	(self) ->
+				self.talk "I was created by Yoni Lerner."
 			lunch:		(self, data) ->
 				nolunch = -> self.talk "There is no lunch service"
 				now = moment(data?.datetime[0].value.from) or moment()
@@ -308,7 +312,9 @@ When does this class end?
 								self.talk "The lunch dishes are:\n" + dishes.join "\n"								#say dishes
 						).fail ->
 							self.actions._disconnected(self)
-				
+			insult:		(self) ->
+				responses = ["I am in beta", "Please be kind, I do my best", "That's not very S E L of you"]
+				self.talk responses[Math.floor(Math.random() * responses.length)]
 			#internal actions
 			_unknown:	(self) ->
 				self.talk "I didn't understand that.", phonetic: "I did ent understand that"
