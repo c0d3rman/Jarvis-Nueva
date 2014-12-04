@@ -76,6 +76,7 @@ $(document).ready ->
 						if @tryCount <= 3
 							$.ajax @
 						else
+							mixpanel.track "timeout"
 							window.jarvis.talk "I'm having trouble connecting with my servers", phonetic: "I am having trouble connecting with my servers"
 					else
 						window.jarvis.failGracefully ->
@@ -86,6 +87,7 @@ $(document).ready ->
 			this.failGracefully ->
 				intent = rawData.outcomes[0].intent
 				data = rawData.outcomes[0].entities
+				mixpanel.track intent
 				(this.actions[intent] or this.actions._unknown)(this, data)
 		
 		actions:
