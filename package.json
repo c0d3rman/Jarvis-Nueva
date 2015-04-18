@@ -9,6 +9,7 @@
     "coffeecup": "^0.3.21",
     "express": "^4.10.0",
     "express-directory-traversal": "^1.0.2",
+    "express-http-proxy": "^0.3.0",
     "morgan": "^1.4.1",
     "serve-static": "^1.1.0",
     "stylus": "^0.45.1"

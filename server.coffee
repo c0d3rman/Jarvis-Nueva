@@ -10,6 +10,8 @@ https = require 'https'
 edt = require 'express-directory-traversal'
 cluster = require 'cluster'
 os = require 'os'
+proxy = require 'express-http-proxy'
+url = require 'url'
 
 eggs = require './eastereggs'
 
@@ -47,6 +49,11 @@ else
 
 	errorHandler = (err, req, res, next) ->
 		res.status(500).send 'Server error'
+		
+	proxyParser = (req, res) ->
+		console.log req.params.query
+		req.params.query
+	
 
 	app = express()
 
@@ -82,6 +89,11 @@ else
 			res.end eggs[egg]
 		else
 			res.end ""
+	app.get '/proxy/google/:query', proxy 'https://google.com', proxyParser
+	app.get '/proxy/wolfram/:query', proxy 'https://wolframalpha.com', proxyParser
+	app.get '/proxy/yahoo/:query', proxy 'https://yahoo.com', proxyParser
+	app.get '/carter', (req, res) ->
+		res.redirect "http://73.162.155.107"
 	app.get '*', (req, res) ->
 		relpath = "#{req.url.substr(1)}index"
 		filepath = "#{__dirname}/webroot#{req.url}index.coffee"

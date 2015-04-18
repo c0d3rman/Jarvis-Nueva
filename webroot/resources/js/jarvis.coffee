@@ -1,7 +1,7 @@
 $(document).ready ->
 	# define jarvis object for others to interact with
 	jarvis =
-		player: $("#myPlayer").get(0)
+		birthday: moment "2014-05-06T01:35:48.000Z"
 		swearWords: ( ->
 			tempObj = null
 			jQuery.ajax url: '/resources/data/swearWords.json', async: no, dataType: "json", success: (json) ->
@@ -19,14 +19,16 @@ $(document).ready ->
 			
 				phonetic = phonetic.split /\n/	# make new lines into their own utterances
 				
-				uid = Math.floor(Math.random() * 100000)
-				$("#terminalContent").append $("<p></p>").text(speaker + ': ' + message).attr 'id', uid
-				setTimeout (id) ->
-					$("#" + id).fadeOut 1000, -> $(this).remove()
-				, 5000, uid
+				
+				$("#terminalContent").append $("<p></p>").text(speaker + ': ' + message)
+				
+				offscreen = $("#terminalContent").children(":offscreen").length
+				$("#terminalContent").children().slice(0, offscreen).fadeOut -> this.remove()
+				
+				
 				$(document).profanityFilter customSwears: this.swearWords
 				if speaker == "Jarvis"
-					if speechSynthesis?
+					if false #speechSynthesis?
 						for line in phonetic
 							message = new SpeechSynthesisUtterance line
 							message.voice = speechSynthesis.getVoices().filter((voice) -> voice.name == 'Google UK English Male')[0]
@@ -46,10 +48,20 @@ $(document).ready ->
 				speechSynthesis.cancel()
 				speechSynthesis.speak message
 		
+		randpick: (choices) ->
+			this.talk choices[Math.floor(Math.random() * choices.length)]
+		
+		fadeout: (element) ->
+			uid = Math.floor(Math.random() * 100000)
+			element.attr 'id', uid
+			setTimeout (id) ->
+				$("#" + id).fadeOut 1000, -> $(this).remove()
+			, 5000, uid
+		
 		process: (command) ->
 			this.failGracefully ->
 				this.actions._easteregg this, command, ->
-					$.ajax({
+					$.ajax
 						url: "https://api.wit.ai/message"
 						data:
 							'v': '20141001' #Oct 1st 2014
@@ -59,13 +71,13 @@ $(document).ready ->
 						jsonp: "callback"
 						method: "POST"
 						timeout: 1000
-					}).done((data) ->
+					.done (data) ->
 						confidence = data.outcomes[0].confidence
 						if confidence > 0.6
 							window.jarvis.understand data
 						else
 							window.jarvis.actions._unknown(window.jarvis)
-					).fail((jqXHR, textStatus, errorThrown) ->
+					.fail (jqXHR, textStatus, errorThrown) ->
 						console.log 'textStatus: ' + textStatus
 						console.log 'errorThrown: ' + errorThrown
 						console.log 'jqXHR: ' + jqXHR
@@ -73,16 +85,11 @@ $(document).ready ->
 							window.jarvis.talk "I can't connect to the internet", phonetic: "I cant connect to the internet"
 							throw errorThrown
 						else if textStatus is 'timeout'
-							@tryCount++
-							if @tryCount <= 3
-								$.ajax @
-							else
-								mixpanel.track "timeout"
-								window.jarvis.talk "I'm having trouble connecting with my servers", phonetic: "I am having trouble connecting with my servers"
+							mixpanel.track "timeout"
+							window.jarvis.talk "I'm having trouble connecting with my servers", phonetic: "I am having trouble connecting with my servers"
 						else
-							window.jarvis.failGracefully ->
-								throw errorThrown
-					)
+							window.jarvis.failGracefully -> throw errorThrown
+					.retry times: 3, timeout: 5000
 				
 		understand: (rawData) ->
 			this.failGracefully ->
@@ -92,85 +99,33 @@ $(document).ready ->
 				(this.actions[intent] or this.actions._unknown)(this, data)
 		
 		actions:
-			hello:		(self) ->
-				greetings = ["Hello", "Hi", "Wazzap ma homie", "Hello sir", "Greetings"]
-				self.talk greetings[Math.floor(Math.random() * greetings.length)]
-			list:		(self, data) ->
-				$.get("/resources/userMusic/", (data) ->
-					data = (data[i] = element.slice(0, -4).replace /_/g, " " for element, i in data.split "\n").slice 0, -1
-					self.talk "I can play:\n#{data.join "\n"}"
-				).fail ->
-					self.talk "Connect to the internet to play music"
-					
-			pause:		(self, data) ->
-				self.player.pause()
-				self.talk "Pausing song"
-			play:		(self, data) ->
-				songName = data.song_name[0].value
-				filename = songName.replace(new RegExp(' ', 'g'), "_").toLowerCase() + ".mp3" #uses RegExp object to avoid leading whitespace regex division bug (#607 in GitHub)
-				filepath = "/resources/userMusic/#{filename}"
-				$.get(filepath)
-					.done( ->
-						$(self.player).attr "src", filepath
-						self.player.play()
-						self.talk "Playing #{songName}"
-					).fail ->
-						self.player.pause()
-						self.talk "I don't have the song #{songName}"
-			speak:		(self, data) ->
-				self.talk data.message_body[0].value
-			shuffle:	(self) ->
-					$.get("/resources/userMusic/", (data) ->
-						data = (data[i] = element.slice(0, -4).replace /_/g, " " for element, i in data.split "\n").slice 0, -1
-						
-						#shuffle function from https://gist.github.com/ddgromit/859699
-						shuffle = (a) ->
-							i = a.length
-							while --i > 0
-								j = ~~(Math.random() * (i + 1))
-								t = a[j]
-								a[j] = a[i]
-								a[i] = t
-							a
-						data = shuffle data
-						self.actions.play self, {song_name: [{value: data[0]}]}
-					).fail ->
-						self.talk "Connect to the internet to play music"
-			search:		(self, data) ->
-				engineHash =
-					"google": "https://www.google.com/search?q="
-					"wikipedia": "http://en.wikipedia.org/wiki/Special:Search?search="
-					"wolfram alpha": "http://www.wolframalpha.com/input/?i="
-				
-				query = data.search_query || data.wikipedia_search_query || data.wolfram_search_query
-				query = query[0].value
-				engine = data.search_engine?.value || "google"
-				window.open engineHash[engine.toLowerCase()] + encodeURIComponent(query), "_self"
-				
-				self.talk "Searching #{engine} for #{query}"
-			unpause:	(self, data) ->
-				self.player.play()
-				self.talk "Unpausing song"
+			age:		(self) ->
+				self.talk "I was created #{self.birthday.fromNow()}"
+			birthday:	(self) ->
+				self.talk "I was created on #{self.birthday.format 'MMMM Do, YYYY'}"
 			calculate:	(self, data) ->
 				expression = data.math_expression[0].value
 				self.talk "Calculating #{expression}"
 				window.open "http://www.wolframalpha.com/input/?i=#{encodeURIComponent expression}", "_self"
-			help:		(self) ->
-				#self.talk "You can say:\n" + (name for name, action of self.actions when name.charAt(0) isnt '_').join "\n"
-				self.talk """You can say:
-What class do I have now?
-What's the time?
-What is for lunch tomorrow?
-What day is it?
-Who are you?
-Who made you?
-When does this class end?
-"""
-			class_now:	(self) ->
-				#className = window.scheduleUtils.getClassFromTime window.scheduleUtils.schedule, data.datetime[0].value.from
-				className = window.scheduleUtils.getCurrentClass()
-				if className?
-					self.talk "You have #{className} right now"
+			class_end:	(self) ->
+				if window.scheduleUtils.getCurrentClass()?
+					[day, time] = window.scheduleUtils.getCurrentTime()
+					scheduleRawPart = window.scheduleUtils.scheduleRaw.schedule[day]
+					sortedKeys = Object.keys(scheduleRawPart).sort (a, b) ->
+						a = (new JarvisTimeRange a).startTime
+						b = (new JarvisTimeRange b).startTime
+						if a < b
+							-1
+						else if a > b
+							1
+						else
+							0
+					for key in sortedKeys
+						if (new JarvisTimeRange key).contains time
+							classTime = (new JarvisTimeRange key).endTime
+							break
+					classEnd = classTime - new JarvisTime new Date()
+					self.talk "Your class ends in #{classEnd} minutes"
 				else
 					self.talk "You don't have a class right now"
 			class_next:	(self, data) ->
@@ -201,42 +156,10 @@ When does this class end?
 					self.talk "This is your last class of the day"
 				else
 					self.talk "The day is over!"
-			class_time:	(self, data) ->
-				date = new Date data.datetime[0].value.from
-				day = date.getDay()
-				time = new JarvisTime "#{date.getHours()}:#{date.getMinutes()}"
-				className = window.scheduleUtils.getClassFromTime window.scheduleUtils.schedule, day, time.toString()
+			class_now:	(self) ->
+				className = window.scheduleUtils.getCurrentClass()
 				if className?
-					if day is new Date().getDay()
-						self.talk "You have #{className} at #{time.toFormattedString()}", phonetic: "You have #{className} at #{time.toSpokenFormattedString()}"
-					else
-						days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-						self.talk "You have #{className} at #{time.toFormattedString()} on #{days[day]}", phonetic: "You have #{className} at #{time.toSpokenFormattedString()} on #{days[day]}"
-				else
-					if day is new Date().getDay()
-						self.talk "You don't have a class at #{time.toFormattedString()}", phonetic: "You don't have a class at #{time.toSpokenFormattedString()}"
-					else
-						days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-						self.talk "You don't have a class at #{time.toFormattedString()} on #{days[day]}", phonetic: "You don't have a class at #{time.toSpokenFormattedString()} on #{days[day]}"
-			class_end:	(self) ->
-				if window.scheduleUtils.getCurrentClass()?
-					[day, time] = window.scheduleUtils.getCurrentTime()
-					scheduleRawPart = window.scheduleUtils.scheduleRaw.schedule[day]
-					sortedKeys = Object.keys(scheduleRawPart).sort (a, b) ->
-						a = (new JarvisTimeRange a).startTime
-						b = (new JarvisTimeRange b).startTime
-						if a < b
-							-1
-						else if a > b
-							1
-						else
-							0
-					for key in sortedKeys
-						if (new JarvisTimeRange key).contains time
-							classTime = (new JarvisTimeRange key).endTime
-							break
-					classEnd = classTime - new JarvisTime new Date()
-					self.talk "Your class ends in #{classEnd} minutes"
+					self.talk "You have #{className} right now"
 				else
 					self.talk "You don't have a class right now"
 			class_ordinal:	(self, data) ->
@@ -261,10 +184,7 @@ When does this class end?
 				else
 					1
 				className = window.scheduleUtils.scheduleRaw.names[scheduleRawPart[sortedKeys[ordinal - 1]]]
-				getOrdinal = (n) -> #from https://ecommerce.shopify.com/c/ecommerce-design/t/ordinal-number-in-javascript-1st-2nd-3rd-4th-29259
-					s = ["th", "st", "nd", "rd"]
-					v = n % 100
-					n + (s[(v - 20) % 10] || s[v] || s[0])
+				
 				if className?
 					if day is new Date().getDay()
 						self.talk "You have #{className} #{getOrdinal ordinal}"
@@ -277,22 +197,57 @@ When does this class end?
 					else
 						days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 						self.talk "You only have #{sortedKeys.length} classes on #{days[day]}"
-			time:		(self) ->
-				now = new Date()
-				now = new JarvisTime now
-				self.talk "The time is now #{now.toFormattedString()}", phonetic: "The time is now #{now.toSpokenFormattedString()}"
+			class_time:	(self, data) ->
+				date = new Date data.datetime[0].value.from
+				day = date.getDay()
+				time = new JarvisTime "#{date.getHours()}:#{date.getMinutes()}"
+				className = window.scheduleUtils.getClassFromTime window.scheduleUtils.schedule, day, time.toString()
+				if className?
+					if day is new Date().getDay()
+						self.talk "You have #{className} at #{time.toFormattedString()}", phonetic: "You have #{className} at #{time.toSpokenFormattedString()}"
+					else
+						days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+						self.talk "You have #{className} at #{time.toFormattedString()} on #{days[day]}", phonetic: "You have #{className} at #{time.toSpokenFormattedString()} on #{days[day]}"
+				else
+					if day is new Date().getDay()
+						self.talk "You don't have a class at #{time.toFormattedString()}", phonetic: "You don't have a class at #{time.toSpokenFormattedString()}"
+					else
+						days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+						self.talk "You don't have a class at #{time.toFormattedString()} on #{days[day]}", phonetic: "You don't have a class at #{time.toSpokenFormattedString()} on #{days[day]}"
+			creator:	(self) ->
+				self.talk "I was created by Yoni Lerner."
 			day:		(self) ->
 				now = moment()
 				self.talk "Today is #{now.format 'dddd, MMMM Do'}"
-			who:		(self) ->
-				self.talk "I am Jarvis, a smart personal assistant for Nueva students."
-			creator:	(self) ->
-				self.talk "I was created by Yoni Lerner."
+			hello:		(self) ->
+				self.randpick ["Hello", "Hi", "Wazzap ma homie", "Hello sir", "Greetings"]
+			help:		(self) ->
+				#self.talk "You can say:\n" + (name for name, action of self.actions when name.charAt(0) isnt '_').join "\n"
+				self.talk """You can say:
+What class do I have now?
+What's the time?
+What is for lunch tomorrow?
+What day is it?
+Who are you?
+Who made you?
+When does this class end?
+"""
+			insult:		(self) ->
+				self.randpick ["I am in beta", "Please be kind, I do my best", "That's not very S E L of you", "What did you just call me"]
+			joke:		(self) ->
+				self.randpick ["Your programming skills", "My mom wanted me to be a top android, but I'm always at the bot-tom.", "There are 10 types of people: those who know binary and those who don't", "How are calculators like bacteria? They both divide", "How does Bill gates count? 1 2 3 95 98 NT 2000 XP Vista 7 8 10", "What's worse than an apple with a bug in it? A program with a bug in it"]
 			lunch:		(self, data) ->
 				nolunch = -> self.talk "There is no lunch service"
-				now = moment(data?.datetime[0].value.from) or moment()
+				now = moment(data.datetime?[0].value.from) or moment()
 				date = now.format "MM/DD/YY"
 				day = now.day()
+				
+				#Create dish filter
+				dishRegex = "of The Day|Farm to Fork"
+				if not data?.glutenveggie
+					dishRegex += "|Vegetarian|Gluten"
+				dishRegex = new RegExp dishRegex, "i"
+				dishFilter = (dish) -> not dishRegex.test dish
 				
 				if day is 0 or day is 6
 					nolunch()
@@ -311,19 +266,94 @@ When does this class end?
 							else
 								dishes = menu.children('span')														#get all dishes in every category
 								dishes = (dish.innerText.replace "» ", "" for dish in dishes)						#get dish texts and remove "» "
-								dishes = dishes.filter (dish) -> not dish.match /of The Day|Gluten|Farm to Fork/i	#Filter soup of the day, gluten-free dishes, and veggie sides
+								dishes = dishes.filter dishFilter													#Filter soup of the day, gluten-free dishes, and veggie sides
 								self.talk "The lunch dishes are:\n" + dishes.join "\n"								#say dishes
 						).fail ->
 							self.actions._disconnected(self)
-			insult:		(self) ->
-				responses = ["I am in beta", "Please be kind, I do my best", "That's not very S E L of you"]
-				self.talk responses[Math.floor(Math.random() * responses.length)]
+			noreply:	(self) ->
+			schedule:	(self, data) ->
+				weekday = moment(data.datetime?[0].value.from).day()
+				classes = scheduleUtils.scheduleRaw.schedule[weekday]
+				
+				self.talk "Here is your schedule", phonetic: "Here is your skejew all"
+				table = $("<table></table>")
+				for timeRange, classCode of classes
+					name = scheduleUtils.scheduleRaw.names[classCode]
+					namecell = $("<td></td>").text name
+					timecell = $("<td></td>").text timeRange
+					row = $("<tr></tr>").append(namecell).append timecell
+					table.append row
+				$.featherlight table
+			search:		(self, data) ->
+				if data.search_query?
+					engineHash =
+						"google": "/proxy/google/search?q="
+						"wikipedia": "https://en.wikipedia.org/wiki/Special:Search?search="
+						"wolfram alpha": "/proxy/input/?i="
+						"bing": "https://www.bing.com/search?q="
+						"yahoo": "/proxy/yahoo/search?p="
+				
+					query = data.search_query[0].value
+					engine = data.search_engine?[0].value || "google"
+					url = engineHash[engine.toLowerCase()] + encodeURIComponent(query)
+					$.featherlight $("<iframe></iframe>").attr("src", url).addClass("lightbox")
+				
+					self.talk "Searching #{engine} for #{query}"
+				else
+					self.talk "Please tell me what to search for", phonetic: "Please tell me what to search four"
+			smalltalk:	(self) ->
+				self.talk "Fine, thanks."
+			speak:		(self, data) ->
+				self.talk data.message_body[0].value
+			time:		(self) ->
+				now = new Date()
+				now = new JarvisTime now
+				self.talk "The time is now #{now.toFormattedString()}", phonetic: "The time is now #{now.toSpokenFormattedString()}"
+			weather:	(self, data) ->
+				$('<div></div>').attr('id', 'weather')
+				try
+					$.simpleWeather
+						location: data.location?[0].value or "San Mateo, CA"
+						woeid: ''
+						unit: 'f'
+						success: (weather) ->
+							if data.datetime? and moment(data.datetime[0].value.from).diff(moment(), "days") isnt 0
+								forecastNum = moment(data.datetime[0].value.from).diff(moment(), "days") + 1
+								unless 0 < forecastNum <= 4
+									self.talk "I only have a five-day forecast"
+									return
+								main = """<i class="icon-#{weather.forecast[forecastNum].code}"></i> #{weather.forecast[forecastNum].low}-#{weather.forecast[forecastNum].high}&deg;#{weather.units.temp}"""
+								mid = weather.forecast[forecastNum].text
+								right = weather.forecast[forecastNum].day
+								self.talk "Here is the weather for #{data.location?[0].value or 'Bay Meadows'} on #{moment(data.datetime[0].value.from).format 'dddd'}"
+							else
+								main = """<i class="icon-#{weather.code}"></i> #{weather.temp}&deg;#{weather.units.temp}"""
+								mid = weather.currently
+								right = "#{weather.humidity}%"
+								self.talk "Here is the weather for #{data.location?[0].value or 'Bay Meadows'}"
+							$.featherlight $("<div></div>").attr("id", "weather").html """<h2>#{main}</h2>
+							<ul><li>#{weather.city}, #{weather.region}</li>
+							<li class="currently">#{mid}</li>
+							<li>#{right}</li></ul>"""
+						error: (error) ->
+							$("#weather").html "<p>#{error}</p>"
+				catch
+					console.log e
+					if e.message is "Cannot read property 'channel' of null"
+						self.talk "I could not find the weather for #{data.location?[0].value or 'Bay Meadows'}"
+					else
+						this.failGracefully -> throw e
+			who:		(self) ->
+				self.talk "I am Jarvis, a smart personal assistant for Nueva students."
+			year:		(self) ->
+				self.talk "The year is #{moment().format 'YYYY'}"
 			#internal actions
 			_unknown:	(self) ->
 				self.talk "I didn't understand that.", phonetic: "I did ent understand that"
 			_disconnected: (self) ->
 				self.talk "I can't connect to the internet"
 			_easteregg: (self, egg, callback) ->
+				egg = egg.toLowerCase().replace /[^a-z ]/g, ""
 				$.get "/eastereggs/#{egg}"
 					.done (response) ->
 						if response isnt ""

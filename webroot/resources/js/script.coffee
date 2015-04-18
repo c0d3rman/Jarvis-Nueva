@@ -20,6 +20,7 @@ $(document).ready ->
 	
 	# submit on enter anywhere in page (and save entries)
 	$(document).keydown (event) ->
+		resetInteractionCountdown()
 		if event.keyCode == 13
 			window.submitTerminal()
 		else if event.keyCode == 27
@@ -29,3 +30,21 @@ $(document).ready ->
 	$("#in").focus()
 	$("#in").blur ->
 		$(this).focus()
+		
+	window.interactionCountdown = 0
+	#clear terminal after no interaction for 15 seconds
+	setInterval ->
+		if window.interactionCountdown is 0
+			$("#terminalContent").children().fadeOut -> $(this).remove()
+			$.featherlight.current()?.close() #close lightbox if it is open
+			window.interactionCountdown = -1 #don't keep clearing terminal
+		else if window.interactionCountdown > 0
+			window.interactionCountdown--
+	, 1000
+	
+	#provide method to reset countdown
+	window.resetInteractionCountdown = ->
+		window.interactionCountdown = 15
+		
+	#set starting interaction countdown
+	resetInteractionCountdown()

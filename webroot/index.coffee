@@ -13,7 +13,9 @@ html ->
 		meta property: 'og:url', content: 'https://jarvispa.info/'
 
 		link href: '/resources/lib/font-awesome.min.css', rel: 'stylesheet'
+		link href: '/resources/lib/featherlight.min.css', rel: 'stylesheet'
 		link href: '/resources/css/main.css', rel: 'stylesheet'
+		link href: '/resources/css/weather.css', rel: 'stylesheet'
 		link href: '/resources/images/favicon.png', rel: 'icon', type: 'image/png'
 		
 		script src: '/resources/lib/jquery.min.js'
@@ -22,7 +24,12 @@ html ->
 		script src: '/resources/lib/moment.min.js'
 		script src: '/resources/lib/jquery.xdomainajax.js'
 		script src: '/resources/lib/mixpanel.js'
+		script src: '/resources/lib/featherlight.min.js'
+		script src: '/resources/lib/jquery.simpleWeather.min.js'
+		script src: '/resources/lib/jquery.ajax-retry.min.js'
+		script src: '/resources/lib/speakjs/speakClient.js'
 
+		script src: '/resources/js/util.js'
 		script src: '/resources/js/jarvis.js'
 		script src: '/resources/js/script.js'
 		script src: '/resources/js/speech.js'

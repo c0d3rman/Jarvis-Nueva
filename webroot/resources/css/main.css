@@ -101,3 +101,7 @@ footer {
 
 #myPlayer, #audio {
   display: none; }
+
+.lightbox {
+  width: 80vw;
+  height: 80vh; }
