@@ -28,9 +28,9 @@ $(document).ready ->
 				
 				$(document).profanityFilter customSwears: this.swearWords
 				if speaker == "Jarvis"
-					if false #speechSynthesis?
+					if speechSynthesis?
 						for line in phonetic
-							message = new SpeechSynthesisUtterance line
+							message = new speechSynthesisUtterance line
 							message.voice = speechSynthesis.getVoices().filter((voice) -> voice.name == 'Google UK English Male')[0]
 							message.lang = "en-GB"
 							message.onend = (event) ->
@@ -265,7 +265,7 @@ When does this class end?
 								nolunch()
 							else
 								dishes = menu.children('span')														#get all dishes in every category
-								dishes = (dish.innerText.replace "» ", "" for dish in dishes)						#get dish texts and remove "» "
+								dishes = (dish.innerText.replace /» |\s{2,}/g, "" for dish in dishes)				#get dish texts and remove "» "
 								dishes = dishes.filter dishFilter													#Filter soup of the day, gluten-free dishes, and veggie sides
 								self.talk "The lunch dishes are:\n" + dishes.join "\n"								#say dishes
 						).fail ->
