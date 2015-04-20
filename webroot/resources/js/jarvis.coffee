@@ -10,36 +10,37 @@ $(document).ready ->
 		)()
 		# add a talk fuction to submit messages to terminal
 		talk: (message, {speaker, phonetic} = {}) ->
-			this.failGracefully ->
-				speaker ?= "Jarvis" 						# speaker default is "Jarvis"
-				message = message
-					.replace(/<(?:.|\n)*?>/gm, '')			# remove HTML
-					.replace /[^A-Z0-9!.?:;,\s'"-]/ig, ''	# zap gremlins'
-				phonetic ?= message 			# phonetic default is the message
+			speaker ?= "Jarvis" 						# speaker default is "Jarvis"
+			message = message
+				.replace(/<(?:.|\n)*?>/gm, '')			# remove HTML
+				.replace /[^A-Z0-9!.?:;,\s'"-]/ig, ''	# zap gremlins'
+			phonetic ?= message 			# phonetic default is the message
+		
+			phonetic = phonetic.split /\n/	# make new lines into their own utterances
+			console.log phonetic
 			
-				phonetic = phonetic.split /\n/	# make new lines into their own utterances
-				
-				
-				$("#terminalContent").append $("<p></p>").text(speaker + ': ' + message)
-				
-				offscreen = $("#terminalContent").children(":offscreen").length
-				$("#terminalContent").children().slice(0, offscreen).fadeOut -> this.remove()
-				
-				
-				$(document).profanityFilter customSwears: this.swearWords
-				if speaker == "Jarvis"
-					if speechSynthesis?
-						for line in phonetic
-							message = new speechSynthesisUtterance line
-							message.voice = speechSynthesis.getVoices().filter((voice) -> voice.name == 'Google UK English Male')[0]
-							message.lang = "en-GB"
-							message.onend = (event) ->
-								window.jarvis.queue.shift()
-								speechSynthesis.cancel()
-								speechSynthesis.speak window.jarvis.queue[0] if window.jarvis.queue[0]?
-							this.queueUp message
-					else
-						speak phonetic.join("\n"), {pitch: 20}
+			
+			$("#terminalContent").append $("<p></p>").text(speaker + ': ' + message)
+			
+			offscreen = $("#terminalContent").children(":offscreen").length
+			$("#terminalContent").children().slice(0, offscreen).fadeOut -> this.remove()
+			
+			
+			$(document).profanityFilter customSwears: this.swearWords
+			if speaker == "Jarvis"
+				if speechSynthesis?
+					for line in phonetic
+						message = new SpeechSynthesisUtterance line
+						message.voice = speechSynthesis.getVoices().filter((voice) -> voice.name == 'Google UK English Male')[0]
+						message.lang = "en-GB"
+						message.onend = (event) ->
+							window.jarvis.queue.shift()
+							speechSynthesis.cancel()
+							speechSynthesis.speak window.jarvis.queue[0] if window.jarvis.queue[0]?
+						this.queueUp message
+				else
+					#speak phonetic.join("\n"), {pitch: 20}
+					console.log "Text to speech not supported"
 		# handle utterance queueing
 		queue: []
 		queueUp: (message) ->
@@ -365,8 +366,8 @@ When does this class end?
 			try
 				todo.apply this
 			catch error
-				this.talk "Error. See console for details"
 				console.log "Jarvis error: #{error.stack or error}"
+				this.talk "Error. See console for details"
 			
 	# export jarvis
 	(exports ? window).jarvis = jarvis
