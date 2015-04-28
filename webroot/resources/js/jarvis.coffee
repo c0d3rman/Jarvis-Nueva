@@ -19,8 +19,7 @@ $(document).ready ->
 			offscreen = $("#terminalContent").children(":offscreen").length
 			$("#terminalContent").children().slice(0, offscreen).fadeOut -> this.remove()
 			
-			
-			$(document).profanityFilter customSwears: this.swearWords
+			$(document).profanityFilter customSwears: this.swearWords or {}
 			if speaker == "Jarvis"
 				if speechSynthesis?
 					for line in phonetic
