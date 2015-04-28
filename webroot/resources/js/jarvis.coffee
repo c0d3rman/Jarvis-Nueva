@@ -289,7 +289,7 @@ When does this class end?
 				weekday = moment(data.datetime?[0].value.from).day()
 				classes = scheduleUtils.scheduleRaw.schedule[weekday]
 				
-				self.talk "Here is your schedule", phonetic: "Here is your skejew all"
+				self.talk "Here is your schedule", phonetic: "Here is your skejewall"
 				table = $("<table></table>")
 				for timeRange, classCode of classes
 					name = scheduleUtils.scheduleRaw.names[classCode]
