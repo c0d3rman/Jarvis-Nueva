@@ -12,7 +12,6 @@ $(document).ready ->
 			phonetic ?= message 			# phonetic default is the message
 		
 			phonetic = phonetic.split /\n/	# make new lines into their own utterances
-			console.log phonetic
 			
 			
 			$("#terminalContent").append $("<p></p>").text(speaker + ': ' + message)
