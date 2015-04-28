@@ -64,7 +64,7 @@ $(document).ready ->
 					$.ajax
 						url: "https://api.wit.ai/message"
 						data:
-							'v': '20141001' #Oct 1st 2014
+							'v': '20150427' #April 7th 2015
 							'q': command
 							'access_token': "HFJ5Y3XFVSEXQICMCUPICOJKO6IIBECQ"
 						dataType: "jsonp"
