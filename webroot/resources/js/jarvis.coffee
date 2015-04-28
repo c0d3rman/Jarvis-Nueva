@@ -308,7 +308,7 @@ When does this class end?
 						"yahoo": "/proxy/yahoo/search?p="
 				
 					query = data.search_query[0].value
-					engine = data.search_engine?[0].value || "google"
+					engine = data.search_engine?[0].value or "google"
 					url = engineHash[engine.toLowerCase()] + encodeURIComponent(query)
 					$.featherlight $("<iframe></iframe>").attr("src", url).addClass("lightbox")
 				
