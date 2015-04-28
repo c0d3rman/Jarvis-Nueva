@@ -96,6 +96,31 @@ $(document).ready ->
 				expression = data.math_expression[0].value
 				self.talk "Calculating #{expression}"
 				window.open "http://www.wolframalpha.com/input/?i=#{encodeURIComponent expression}", "_self"
+			caltrain: (self, data) ->
+				origin = data.origin?[0].value
+				destination = data.destination?[0].value
+				origin = "Hillsdale" if origin is "Here"
+				destination = "Hillsdale" if destination is "Here"
+				# if no stations were given whatsoever, give up
+				if not origin? and not destination?
+					self.talk "Please tell me which stations you want to take the train to and from.", phonetic: "Please tell me which stations you want to take the train to, and froam."
+				# if only an origin was given, report the first train to arrive at that origin
+				else if not destination?
+					jQuery.ajax url: "https://caltrain-realtime.herokuapp.com/api/#{origin}",
+						dataType: "json",
+					.done (json) ->
+							train.northbound = true for train in json.northbound # mark all northbound trains
+							trains = json.northbound.concat json.southbound
+							trains.sort (train1, train2) -> parseInt(train2.minutesUntilDeparture) - parseInt(train2.minutesUntilDeparture)
+							firstTrain = trains[0]
+							direction = if train.northbound then "north" else "south"
+							window.jarvis.talk "The next train to arrive at #{origin} is train #{firstTrain.trainNumber}.
+It will arrive in #{firstTrain.minutesUntilDeparture} minutes and is #{direction}bound."
+					.fail this.ajaxFailure
+					.retry times: 3, timeout: 5000
+				# otherwise, default origin to Hillsdale and find first train from origin to destination
+				else
+					self.talk "Not yet supported"
 			class_end:	(self) ->
 				if window.scheduleUtils.getCurrentClass()?
 					[day, time] = window.scheduleUtils.getCurrentTime()
