@@ -229,7 +229,7 @@ It will arrive in #{firstTrain.minutesUntilDeparture} minutes and is #{direction
 						days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 						self.talk "You don't have a class at #{time.toFormattedString()} on #{days[day]}", phonetic: "You don't have a class at #{time.toSpokenFormattedString()} on #{days[day]}"
 			compliment: (self) ->
-				self.talk "Thank you."
+				self.randpick ["Thank you.", "That's sweet of you.", "You're making me blush.", "You're pretty jamming yourself."]
 			creator:	(self) ->
 				self.talk "I was created by Yoni Lerner."
 			day:		(self) ->
