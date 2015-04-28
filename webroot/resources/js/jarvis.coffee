@@ -44,13 +44,19 @@ $(document).ready ->
 		
 		randpick: (choices) ->
 			this.talk choices[Math.floor(Math.random() * choices.length)]
-		
-		fadeout: (element) ->
-			uid = Math.floor(Math.random() * 100000)
-			element.attr 'id', uid
-			setTimeout (id) ->
-				$("#" + id).fadeOut 1000, -> $(this).remove()
-			, 5000, uid
+			
+		ajaxFailure: (jqXHR, textStatus, errorThrown) ->
+			console.log 'textStatus: ' + textStatus
+			console.log 'errorThrown: ' + errorThrown
+			console.log 'jqXHR: ' + jqXHR
+			if not navigator.onLine
+				window.jarvis.talk "I can't connect to the internet", phonetic: "I cant connect to the internet"
+				throw errorThrown
+			else if textStatus is 'timeout'
+				mixpanel.track "timeout"
+				window.jarvis.talk "I'm having trouble connecting with my servers", phonetic: "I am having trouble connecting with my servers"
+			else
+				window.jarvis.failGracefully -> throw errorThrown
 		
 		process: (command) ->
 			this.failGracefully ->
@@ -71,18 +77,7 @@ $(document).ready ->
 							window.jarvis.understand data
 						else
 							window.jarvis.actions._unknown(window.jarvis)
-					.fail (jqXHR, textStatus, errorThrown) ->
-						console.log 'textStatus: ' + textStatus
-						console.log 'errorThrown: ' + errorThrown
-						console.log 'jqXHR: ' + jqXHR
-						if not navigator.onLine
-							window.jarvis.talk "I can't connect to the internet", phonetic: "I cant connect to the internet"
-							throw errorThrown
-						else if textStatus is 'timeout'
-							mixpanel.track "timeout"
-							window.jarvis.talk "I'm having trouble connecting with my servers", phonetic: "I am having trouble connecting with my servers"
-						else
-							window.jarvis.failGracefully -> throw errorThrown
+					.fail this.ajaxFailure
 					.retry times: 3, timeout: 5000
 				
 		understand: (rawData) ->
