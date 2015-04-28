@@ -321,6 +321,8 @@ When does this class end?
 				self.talk "Fine, thanks."
 			speak:		(self, data) ->
 				self.talk data.message_body[0].value
+			thanks:		(self) ->
+				self.randpick ["You're welcome.", "My pleasure.", "Of course.", "No problem."]
 			time:		(self) ->
 				now = new Date()
 				now = new JarvisTime now
