@@ -2,12 +2,7 @@ $(document).ready ->
 	# define jarvis object for others to interact with
 	jarvis =
 		birthday: moment "2014-05-06T01:35:48.000Z"
-		swearWords: ( ->
-			tempObj = null
-			jQuery.ajax url: '/resources/data/swearWords.json', async: no, dataType: "json", success: (json) ->
-				tempObj = json
-			tempObj
-		)()
+		swearWords: jQuery.ajax url: '/resources/data/swearWords.json', dataType: "json", success: (json) -> window.jarvis.swearWords = json
 		# add a talk fuction to submit messages to terminal
 		talk: (message, {speaker, phonetic} = {}) ->
 			speaker ?= "Jarvis" 						# speaker default is "Jarvis"
