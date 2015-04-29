@@ -269,7 +269,7 @@ Who made you?
 				, 3000
 			lunch:		(self, data) ->
 				nolunch = -> self.talk "There is no lunch service"
-				now = moment(data.datetime?[0].value.from) or moment()
+				now = moment(data.datetime?[0].value) or moment()
 				date = now.format "MM/DD/YY"
 				day = now.day()
 				
