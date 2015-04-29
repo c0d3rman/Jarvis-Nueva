@@ -268,9 +268,7 @@ Who made you?
 				self.randpick ["Your programming skills", "My mom wanted me to be a top android, but I'm always at the bot-tom.", "There are 10 types of people: those who know binary and those who don't", "How are calculators like bacteria? They both divide", "How does Bill gates count? 1 2 3 95 98 NT 2000 XP Vista 7 8 10", "What's worse than an apple with a bug in it? A program with a bug in it"]
 			leave:		(self) ->
 				self.talk "Goodbye sir"
-				setTimeout ->
-					window.interactionCountdown = 0
-				, 3000
+				setTimeout window.clearTerminal, 3000
 			lunch:		(self, data) ->
 				nolunch = -> self.talk "There is no lunch service"
 				now = moment(data.datetime?[0].value) or moment()
