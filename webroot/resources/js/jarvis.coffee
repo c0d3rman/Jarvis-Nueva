@@ -305,7 +305,7 @@ Who made you?
 							self.actions._disconnected(self)
 			noreply:	(self) ->
 			schedule:	(self, data) ->
-				weekday = moment(data.datetime?[0].value.from).day()
+				weekday = moment(data.datetime?[0].value).day()
 				classes = scheduleUtils.scheduleRaw.schedule[weekday]
 				
 				self.talk "Here is your schedule", phonetic: "Here is your skejewall"
@@ -352,20 +352,23 @@ Who made you?
 						woeid: ''
 						unit: 'f'
 						success: (weather) ->
-							if data.datetime? and moment(data.datetime[0].value.from).diff(moment(), "days") isnt 0
-								forecastNum = moment(data.datetime[0].value.from).diff(moment(), "days") + 1
+							timestr = data.datetime?[0].value
+							time = moment timestr
+							location = data.location?[0].value or 'Bay Meadows'
+							if timestr isnt null and time.diff(moment(), "days") isnt 0
+								forecastNum = time.diff(moment(), "days") + 1
 								unless 0 < forecastNum <= 4
 									self.talk "I only have a five-day forecast"
 									return
 								main = """<i class="icon-#{weather.forecast[forecastNum].code}"></i> #{weather.forecast[forecastNum].low}-#{weather.forecast[forecastNum].high}&deg;#{weather.units.temp}"""
 								mid = weather.forecast[forecastNum].text
 								right = weather.forecast[forecastNum].day
-								self.talk "Here is the weather for #{data.location?[0].value or 'Bay Meadows'} on #{moment(data.datetime[0].value.from).format 'dddd'}"
+								self.talk "Here is the weather for #{location} on #{time.format 'dddd'}"
 							else
 								main = """<i class="icon-#{weather.code}"></i> #{weather.temp}&deg;#{weather.units.temp}"""
 								mid = weather.currently
 								right = "#{weather.humidity}%"
-								self.talk "Here is the weather for #{data.location?[0].value or 'Bay Meadows'}"
+								self.talk "Here is the weather for #{location}"
 							$.featherlight $("<div></div>").attr("id", "weather").html """<h2>#{main}</h2>
 							<ul><li>#{weather.city}, #{weather.region}</li>
 							<li class="currently">#{mid}</li>
@@ -373,9 +376,8 @@ Who made you?
 						error: (error) ->
 							$("#weather").html "<p>#{error}</p>"
 				catch
-					console.log e
 					if e.message is "Cannot read property 'channel' of null"
-						self.talk "I could not find the weather for #{data.location?[0].value or 'Bay Meadows'}"
+						self.talk "I could not find the weather for #{location}"
 					else
 						this.failGracefully -> throw e
 			who:		(self) ->
