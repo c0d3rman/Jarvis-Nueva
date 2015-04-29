@@ -99,6 +99,7 @@ $(document).ready ->
 			caltrain: (self, data) ->
 				origin = data.origin?[0].value
 				destination = data.destination?[0].value
+				direction = data.direction?[0].value
 				origin = "Hillsdale" if origin is "Here"
 				destination = "Hillsdale" if destination is "Here"
 				# if no stations were given whatsoever, give up
@@ -108,14 +109,21 @@ $(document).ready ->
 				else if not destination?
 					jQuery.ajax url: "https://caltrain-realtime.herokuapp.com/api/#{origin}",
 						dataType: "json",
-					.done (json) ->
-							train.northbound = true for train in json.northbound # mark all northbound trains
+					.done (do (direction) -> (json) -> # closure to pass in the direction variable
+						console.log direction
+						train.northbound = true for train in json.northbound # mark all northbound trains
+						if direction is "North"
+							trains = json.northbound
+						else if direction is "South"
+							trains = json.southbound
+						else
 							trains = json.northbound.concat json.southbound
-							trains.sort (train1, train2) -> parseInt(train2.minutesUntilDeparture) - parseInt(train2.minutesUntilDeparture)
-							firstTrain = trains[0]
-							direction = if train.northbound then "north" else "south"
-							window.jarvis.talk "The next train to arrive at #{origin} is train #{firstTrain.trainNumber}.
-It will arrive in #{firstTrain.minutesUntilDeparture} minutes and is #{direction}bound."
+						trains.sort (train1, train2) -> parseInt(train2.minutesUntilDeparture) - parseInt(train2.minutesUntilDeparture)
+						firstTrain = trains[0]
+						trainDirection = if train.northbound then "north" else "south"
+						window.jarvis.talk "The next train to arrive at #{origin} is train #{firstTrain.trainNumber}.
+It will arrive in #{firstTrain.minutesUntilDeparture} minutes and is #{trainDirection}bound."
+					)
 					.fail this.ajaxFailure
 					.retry times: 3, timeout: 5000
 				# otherwise, default origin to Hillsdale and find first train from origin to destination
