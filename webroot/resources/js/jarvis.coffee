@@ -110,19 +110,23 @@ $(document).ready ->
 					jQuery.ajax url: "https://caltrain-realtime.herokuapp.com/api/#{origin}",
 						dataType: "json",
 					.done (do (direction) -> (json) -> # closure to pass in the direction variable
-						console.log direction
-						train.northbound = true for train in json.northbound # mark all northbound trains
-						if direction is "North"
-							trains = json.northbound
-						else if direction is "South"
-							trains = json.southbound
+						train.direction = "north" for train in json.northbound # mark all northbound trains
+						train.direction = "south" for train in json.southbound # mark all southbound trains
+						getFirstTrain = (trainlist) -> (trainlist.sort (train1, train2) -> parseInt(train2.minutesUntilDeparture) - parseInt(train2.minutesUntilDeparture))[0]
+						if direction?
+							trains = []
+							if direction is "North"
+								trains = json.northbound
+							else if direction is "South"
+								trains = json.southbound
+							firstTrain = getFirstTrain trains
+							window.jarvis.talk "The next #{firstTrain.direction}bound train to arrive at #{origin} is train #{firstTrain.trainNumber}.
+It will arrive in #{firstTrain.minutesUntilDeparture} minutes."
 						else
 							trains = json.northbound.concat json.southbound
-						trains.sort (train1, train2) -> parseInt(train2.minutesUntilDeparture) - parseInt(train2.minutesUntilDeparture)
-						firstTrain = trains[0]
-						trainDirection = if train.northbound then "north" else "south"
-						window.jarvis.talk "The next train to arrive at #{origin} is train #{firstTrain.trainNumber}.
-It will arrive in #{firstTrain.minutesUntilDeparture} minutes and is #{trainDirection}bound."
+							firstTrain = getFirstTrain trains
+							window.jarvis.talk "The next train to arrive at #{origin} is train #{firstTrain.trainNumber}.
+It will arrive in #{firstTrain.minutesUntilDeparture} minutes and is #{firstTrain.direction}bound."
 					)
 					.fail this.ajaxFailure
 					.retry times: 3, timeout: 5000
