@@ -2,10 +2,12 @@ if annyang
 	execute = (arg1, arg2) ->
 		if arg2? then command = arg2 else command = arg1 #if arg2 is set then arg1 is *garbage
 		window.resetInteractionCountdown()
+		window.closeLightbox()
 		window.jarvis.talk command, speaker: "You"
 		window.jarvis.process command
 	getPrompted = ->
-		resetInteractionCountdown()
+		window.resetInteractionCountdown()
+		window.closeLightbox()
 		window.jarvis.talk "Jarvis...", speaker: "You"
 		window.jarvis.talk "Yes sir?"
 		window.prompted = yes
