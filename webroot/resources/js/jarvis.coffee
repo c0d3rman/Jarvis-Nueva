@@ -247,15 +247,17 @@ It will arrive in #{firstTrain.minutesUntilDeparture} minutes and is #{trainDire
 				self.randpick ["Hello", "Hi", "Wazzap ma homie", "Hello sir", "Greetings"]
 			help:		(self) ->
 				#self.talk "You can say:\n" + (name for name, action of self.actions when name.charAt(0) isnt '_').join "\n"
-				self.talk """You can say:
+				self.talk """Please say \"Jarvis\" followed by a request.
+You can say:
 What class do I have now?
+When does this class end?
 What's the time?
 What is for lunch tomorrow?
+When is the next train leaving Hillsdale station?
 What day is it?
 Who are you?
 Who made you?
-When does this class end?
-"""
+""", phonetic: "Please say Jarvis followed by a request. You can say all kinds of things. Try it out!"
 			insult:		(self) ->
 				self.randpick ["I am in beta", "Please be kind, I do my best", "That's not very S E L of you", "What did you just call me"]
 			joke:		(self) ->
