@@ -121,7 +121,9 @@ else
 		key: fs.readFileSync "#{__dirname}/certs/server.key"
 		cert: fs.readFileSync "#{__dirname}/certs/server.crt"
 
-	wwwdata = -> process.setuid "www-data"
+	wwwdata = ->
+		process.setgid "www-data"
+		process.setuid "www-data"
 	localhost = "0.0.0.0"
 
 	httpServer = http.createServer (req, res) ->
