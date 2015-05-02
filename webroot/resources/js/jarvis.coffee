@@ -269,17 +269,17 @@ Who made you?
 			leave:		(self) ->
 				self.talk "Goodbye sir"
 				setTimeout window.clearTerminal, 3000
-			location:		(self, data) ->
+			location:	(self, data) ->
 				apiKey = "AIzaSyA-PV0aoYdgrhOqNVwJj8booB47eHggXcE"
 				location = data.location?[0].value
 				if not location?
 					self.talk "Please give me a location."
 				else
-					map = $("<iframe></iframe>")
-						.attr("src", "https://www.google.com/maps/embed/v1/place?key=#{apiKey}&q=#{encodeURIComponent location}")
-						.css("width", "80vw")
-						.css("height", "80vh")
-					$.featherlight map
+					$.featherlight(
+						$("<iframe></iframe>")
+							.attr("src", "https://www.google.com/maps/embed/v1/place?key=#{apiKey}&q=#{encodeURIComponent location}")
+							.addClass("lightbox")
+					)
 			lunch:		(self, data) ->
 				nolunch = -> self.talk "There is no lunch service"
 				now = moment(data.datetime?[0].value) or moment()
