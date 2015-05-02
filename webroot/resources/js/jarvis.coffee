@@ -289,7 +289,7 @@ Who made you?
 				#Create dish filter
 				dishRegex = "of The Day|Farm to Fork"
 				if not data?.glutenveggie
-					dishRegex += "|Vegetarian|Gluten"
+					dishRegex += "|Vegetarian|Gluten|Vegan"
 				dishRegex = new RegExp dishRegex, "i"
 				dishFilter = (dish) -> not dishRegex.test dish
 				
