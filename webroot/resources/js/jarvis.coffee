@@ -393,6 +393,11 @@ Who made you?
 						self.talk "I could not find the weather for #{location}"
 					else
 						this.failGracefully -> throw e
+			whistle:	(self) ->
+				numFiles = 4
+				file = "/resources/audio/whistle/whistle#{Math.floor(Math.random() * numFiles + 1)}.mp3"
+				audio = new Audio file
+				audio.play()
 			who:		(self) ->
 				self.talk "I am Jarvis, a smart personal assistant for Nueva students."
 			year:		(self) ->
