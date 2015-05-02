@@ -352,7 +352,7 @@ Who made you?
 			speak:		(self, data) ->
 				self.talk data.message_body[0].value
 			thanks:		(self) ->
-				self.randpick ["You're welcome.", "My pleasure.", "Of course.", "No problem."]
+				self.randpick ["You're welcome.", "My pleasure.", "Of course.", "No problem.", "Sure thing.", "Anytime.", "You bet.", "Don't mention it."]
 			time:		(self) ->
 				now = new Date()
 				now = new JarvisTime now
