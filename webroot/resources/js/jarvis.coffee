@@ -347,6 +347,8 @@ Who made you?
 					self.talk "Please tell me what to search for", phonetic: "Please tell me what to search four"
 			smalltalk:	(self) ->
 				self.talk "Fine, thanks."
+			sorry:		(self) ->
+				self.randpick ["It's OK.", "I forgive you.", "You should be ashamed of yourself.", "No problem.", "No worries.", "It's fine.", "Apology accepted."]
 			speak:		(self, data) ->
 				self.talk data.message_body[0].value
 			thanks:		(self) ->
