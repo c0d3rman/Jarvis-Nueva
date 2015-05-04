@@ -2,4 +2,5 @@ certs
 node_modules
 log
 webroot/resources/userMusic
+webroot/resources/js/apikeys.coffee
 eastereggs.coffee

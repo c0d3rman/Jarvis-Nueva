@@ -66,7 +66,7 @@ $(document).ready ->
 						data:
 							'v': '20150427' #April 7th 2015
 							'q': command
-							'access_token': "HFJ5Y3XFVSEXQICMCUPICOJKO6IIBECQ"
+							'access_token': apiKeys.witai
 						dataType: "jsonp"
 						jsonp: "callback"
 						method: "POST"
@@ -270,14 +270,13 @@ Who made you?
 				self.talk "Goodbye sir"
 				setTimeout window.clearTerminal, 3000
 			location:	(self, data) ->
-				apiKey = "AIzaSyA-PV0aoYdgrhOqNVwJj8booB47eHggXcE"
 				location = data.location?[0].value
 				if not location?
 					self.talk "Please give me a location."
 				else
 					$.featherlight(
 						$("<iframe></iframe>")
-							.attr("src", "https://www.google.com/maps/embed/v1/place?key=#{apiKey}&q=#{encodeURIComponent location}")
+							.attr("src", "https://www.google.com/maps/embed/v1/place?key=#{apiKeys.googleMaps}&q=#{encodeURIComponent location}")
 							.addClass("lightbox")
 					)
 			lunch:		(self, data) ->

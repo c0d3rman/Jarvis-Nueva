@@ -30,6 +30,7 @@ html ->
 		script src: '/resources/lib/speakjs/speakClient.js'
 
 		script src: '/resources/js/util.js'
+		script src: '/resources/js/apikeys.js'
 		script src: '/resources/js/jarvis.js'
 		script src: '/resources/js/script.js'
 		script src: '/resources/js/speech.js'
