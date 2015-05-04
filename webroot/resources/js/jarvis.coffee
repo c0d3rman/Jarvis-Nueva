@@ -245,8 +245,7 @@ It will arrive in #{firstTrain.minutesUntilDeparture} minutes and is #{firstTrai
 			creator:	(self) ->
 				self.talk "I was created by Yoni Lerner."
 			day:		(self) ->
-				now = moment()
-				self.talk "Today is #{now.format 'dddd, MMMM Do'}"
+				self.talk "Today is #{moment().format 'dddd, MMMM Do'}"
 			hello:		(self) ->
 				self.randpick ["Hello", "Hi", "Wazzap ma homie", "Hello sir", "Greetings"]
 			help:		(self) ->
@@ -313,6 +312,8 @@ Who made you?
 								self.talk "The lunch dishes are:\n" + dishes.join "\n"								#say dishes
 						).fail ->
 							self.actions._disconnected(self)
+			month:		(self) ->
+				self.talk "The month is #{moment().format 'MMMM'}"
 			noreply:	(self) ->
 			schedule:	(self, data) ->
 				weekday = moment(data.datetime?[0].value).day()
