@@ -1,10 +1,13 @@
 $(document).ready ->
 	#---------------------------
-	#	Footer Alignment
+	#	Adaptive Directions
 	#---------------------------
-	#$(document.body).resize ->
-	#	console.log "height: " + $(document.body).height()
-	#	$("footer").css "top",  $(document.body).height()
+	setInterval ->
+		navigator.webkitGetUserMedia {video: false, audio: true}, ->
+			$("#directions").text 'Please say "Jarvis" followed by your request or ask for help'
+		, (e) ->
+			console.log e
+	
 	
 	#---------------------------
 	#	Terminal Customization
