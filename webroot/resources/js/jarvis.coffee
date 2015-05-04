@@ -246,6 +246,19 @@ It will arrive in #{firstTrain.minutesUntilDeparture} minutes and is #{firstTrai
 				self.talk "I was created by Yoni Lerner."
 			day:		(self) ->
 				self.talk "Today is #{moment().format 'dddd, MMMM Do'}"
+			directions:	(self, data) ->
+				origin = data.origin?[0].value or "My Location"
+				destination = data.destination?[0].value
+				# if no destination was given, give up
+				if not destination?
+					self.talk "Please tell me where you want to go."
+				else
+					$.featherlight(
+						$("<iframe></iframe>")
+							.attr("src", "https://www.google.com/maps/embed/v1/directions?key=#{apiKeys.googleMaps}&origin=#{encodeURIComponent origin}&destination=#{encodeURIComponent destination}")
+							.addClass("lightbox")
+					)
+					self.talk "Here are the directions you requested"
 			hello:		(self) ->
 				self.randpick ["Hello", "Hi", "Wazzap ma homie", "Hello sir", "Greetings"]
 			help:		(self) ->
