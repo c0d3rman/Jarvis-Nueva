@@ -4,12 +4,12 @@ html ->
 		title 'Jarvis'
 
 		meta 'http-equiv': 'Content-Type', content: 'text/html; charset=UTF-8'
-		meta name: 'description', content: 'A digital personal assistant that accepts voice commands.'
-		meta name: 'keywords', content: 'jarvis,personal assistant,assistant,voice command,jarvis personal assistant'
+		meta name: 'description', content: 'A digital personal assistant for Nueva students that accepts voice commands.'
+		meta name: 'keywords', content: 'jarvis,personal assistant,assistant,voice command,jarvis personal assistant,Nueva,The Nueva School'
 		meta property: 'og:title', content: 'Jarvis Personal Assistant'
 		meta property: 'og:type', content: 'website'
 		meta property: 'og:site_name', content: 'Jarvis Personal Assistant'
-		meta property: 'og:description', content: 'Jarvis is a digital personal assistant that accepts voice commands. He can play music, calculate mathematical expressions, speak, search, and more! BETA'
+		meta property: 'og:description', content: "Jarvis is a digital personal assistant for Nueva students that accepts voice commands. He can play music, calculate mathematical expressions, tell you what's for lunch, search, and more!"
 		meta property: 'og:url', content: 'https://jarvispa.info/'
 
 		link href: '/resources/lib/font-awesome.min.css', rel: 'stylesheet'
@@ -40,9 +40,10 @@ html ->
 			a '#header', href: './', 'JARVIS'
 		h1 '#tagline.resp', ->
 			span '.fa.fa-angle-right', @empty
-			text " Your smart personal assistant"
+			text " Nueva's smart personal assistant"
 			
 		div '#content', ->
+			p '#directions', 'Please type in your request or ask for help'
 			div '#terminal', ->
 				p '#terminalContent', @empty
 				span '#inWrapper', ->
