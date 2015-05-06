@@ -367,6 +367,29 @@ Who made you?
 				self.randpick ["It's OK.", "I forgive you.", "You should be ashamed of yourself.", "No problem.", "No worries.", "It's fine.", "Apology accepted."]
 			speak:		(self, data) ->
 				self.talk data.message_body[0].value
+			suggest:	(self, data) ->
+					$.ajax
+					type: "POST"
+					url: "https://mandrillapp.com/api/1.0/messages/send.json",
+					data:
+						key: apiKeys.mandrill
+						async: yes
+						message:
+							from_email: "suggestions@jarvispa.info"
+							to: [{
+								email: "help@jarvispa.info"
+								type: "to"
+							}]
+							autotext: yes
+							subject: "Bug Report / Feature Request",
+							text: """Hello Jarvis developer,
+I noticed a bug or want to suggest a feature.
+
+I said \"#{data._text}\" to Jarvis.
+
+Thanks!
+-User"""
+				self.talk "Thanks for the feedback! I passed it on."
 			thanks:		(self) ->
 				self.randpick ["You're welcome.", "My pleasure.", "Of course.", "No problem.", "Sure thing.", "Anytime.", "You bet.", "Don't mention it."]
 			time:		(self) ->
