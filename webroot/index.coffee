@@ -58,3 +58,4 @@ html ->
 			text '&copy; 2014 '
 			a '.fancyLink', href: 'https://jarvispa.info/', target: '_blank', 'Yoni'
 			text '.'
+			p style: 'display: inline', ' Report bugs and suggest features to Jarvis directly.'
