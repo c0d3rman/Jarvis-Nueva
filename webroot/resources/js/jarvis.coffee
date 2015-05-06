@@ -4,7 +4,7 @@ $(document).ready ->
 		birthday: moment "2014-05-06T01:35:48.000Z"
 		swearWords: jQuery.ajax url: '/resources/data/swearWords.json', dataType: "json", success: (json) -> window.jarvis.swearWords = json
 		# add a talk fuction to submit messages to terminal
-		talk: (message, {speaker, phonetic} = {}) ->
+		talk: (message, {speaker, phonetic, noprint} = {}) ->
 			speaker ?= "Jarvis" 						# speaker default is "Jarvis"
 			message = message
 				.replace(/<(?:.|\n)*?>/gm, '')			# remove HTML
@@ -13,13 +13,14 @@ $(document).ready ->
 		
 			phonetic = phonetic.split /\n/	# make new lines into their own utterances
 			
+			if not noprint
+				$("#terminalContent").append $("<p></p>").text(speaker + ': ' + message)
 			
-			$("#terminalContent").append $("<p></p>").text(speaker + ': ' + message)
+				offscreen = $("#terminalContent").children(":offscreen").length
+				$("#terminalContent").children().slice(0, offscreen).fadeOut -> this.remove()
 			
-			offscreen = $("#terminalContent").children(":offscreen").length
-			$("#terminalContent").children().slice(0, offscreen).fadeOut -> this.remove()
+				$(document).profanityFilter customSwears: this.swearWords or {}
 			
-			$(document).profanityFilter customSwears: this.swearWords or {}
 			if speaker == "Jarvis"
 				if speechSynthesis?
 					for line in phonetic
