@@ -407,7 +407,7 @@ Who made you?
 					else
 						this.failGracefully -> throw e
 			whistle:	(self) ->
-				numFiles = 4
+				numFiles = 3
 				file = "/resources/audio/whistle/whistle#{Math.floor(Math.random() * numFiles + 1)}.mp3"
 				audio = new Audio file
 				audio.play()
