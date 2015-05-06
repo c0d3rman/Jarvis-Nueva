@@ -368,7 +368,7 @@ Who made you?
 			speak:		(self, data) ->
 				self.talk data.message_body[0].value
 			suggest:	(self, data) ->
-					$.ajax
+				$.ajax
 					type: "POST"
 					url: "https://mandrillapp.com/api/1.0/messages/send.json",
 					data:
