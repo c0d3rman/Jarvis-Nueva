@@ -432,6 +432,13 @@ Thanks!
 						self.talk "I could not find the weather for #{location}"
 					else
 						this.failGracefully -> throw e
+			where:		(self) ->
+				$.featherlight(
+					$("<iframe></iframe>")
+						.attr("src", "https://www.google.com/maps/embed/v1/place?key=#{apiKeys.googleMaps}&q=My+Location")
+						.addClass("lightbox")
+				)
+				self.talk "Right here"
 			whistle:	(self) ->
 				numFiles = 3
 				file = "/resources/audio/whistle/whistle#{Math.floor(Math.random() * numFiles + 1)}.mp3"
