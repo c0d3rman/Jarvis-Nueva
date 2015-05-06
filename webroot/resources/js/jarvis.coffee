@@ -84,6 +84,7 @@ $(document).ready ->
 			this.failGracefully ->
 				intent = rawData.outcomes[0].intent
 				data = rawData.outcomes[0].entities
+				data._text = rawData._text
 				mixpanel.track intent
 				(this.actions[intent] or this.actions._unknown)(this, data)
 		
