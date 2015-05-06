@@ -293,6 +293,7 @@ Who made you?
 							.attr("src", "https://www.google.com/maps/embed/v1/place?key=#{apiKeys.googleMaps}&q=#{encodeURIComponent location}")
 							.addClass("lightbox")
 					)
+					self.talk "Here is the location you requested"
 			lunch:		(self, data) ->
 				nolunch = -> self.talk "There is no lunch service"
 				now = moment(data.datetime?[0].value) or moment()
