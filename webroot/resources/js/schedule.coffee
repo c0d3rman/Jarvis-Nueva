@@ -86,12 +86,7 @@ window.scheduleUtils =
 			output.push today
 		output
 	
-	scheduleRaw: ( ->
-		tempObj = null
-		jQuery.ajax url: '/resources/data/blockSchedule.json', async: no, dataType: "json", success: (json) ->
-			tempObj = json
-		tempObj
-	)()
+	scheduleRaw: null
 
 	getClassFromTime: (schedule, day, time) ->
 		schedule[day][time]
@@ -103,4 +98,9 @@ window.scheduleUtils =
 	getCurrentClass: ->
 		this.getClassFromTime this.schedule, this.getCurrentTime()...
 
-window.scheduleUtils.schedule = window.scheduleUtils.parseSchedule window.scheduleUtils.scheduleRaw
+jQuery.ajax
+	url: '/resources/data/blockSchedule.json'
+	dataType: "json"
+.done (json) ->
+	window.scheduleUtils.scheduleRaw = json
+	window.scheduleUtils.schedule = window.scheduleUtils.parseSchedule window.scheduleUtils.scheduleRaw
