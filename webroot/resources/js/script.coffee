@@ -68,7 +68,7 @@ $(document).ready ->
 	]
 	setInterval ->
 		if window.interactionCountdown is -1
-			if Math.random() * 4 < 1
+			if Math.random() * 10 < 1
 				passiveActions[Math.floor(Math.random() * passiveActions.length)]()
 				resetInteractionCountdown()
 	, 10000
