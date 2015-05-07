@@ -9,7 +9,7 @@ if annyang
 		window.resetInteractionCountdown()
 		window.closeLightbox()
 		window.jarvis.talk "Jarvis...", speaker: "You"
-		window.jarvis.talk "Yes sir?"
+		window.jarvis.talk "Yes?"
 		window.prompted = yes
 
 	commands =

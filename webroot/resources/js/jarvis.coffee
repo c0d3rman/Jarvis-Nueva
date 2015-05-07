@@ -262,7 +262,7 @@ It will arrive in #{firstTrain.minutesUntilDeparture} minutes and is #{firstTrai
 					)
 					self.talk "Here are the directions you requested"
 			hello:		(self) ->
-				self.randpick ["Hello", "Hi", "Wazzap ma homie", "Hello sir", "Greetings"]
+				self.randpick ["Hello", "Hi", "Wazzap ma homie", "Hello comrade", "Hello dear friend", "Hello friend", "Hello comrade", "Hello buddy", "Hello pal", "Hi there old chap", "Good day mate", "Greetings"]
 			help:		(self) ->
 				#self.talk "You can say:\n" + (name for name, action of self.actions when name.charAt(0) isnt '_').join "\n"
 				self.talk """Please say \"Jarvis\" followed by a request.
@@ -473,4 +473,4 @@ Thanks!
 	(exports ? window).jarvis = jarvis
 	
 	# greet user
-	jarvis.talk "Hello sir"
+	jarvis.talk "Hello"
