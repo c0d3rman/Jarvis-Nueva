@@ -27,7 +27,7 @@ html ->
 		script src: '/resources/lib/featherlight.min.js'
 		script src: '/resources/lib/jquery.simpleWeather.min.js'
 		script src: '/resources/lib/jquery.ajax-retry.min.js'
-		script src: '/resources/lib/speakjs/speakClient.js'
+		#script src: '/resources/lib/speakjs/speakClient.js'
 
 		script src: '/resources/js/util.js'
 		script src: '/resources/js/apikeys.js'
