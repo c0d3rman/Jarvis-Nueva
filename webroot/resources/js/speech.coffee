@@ -11,21 +11,26 @@ if annyang
 		window.jarvis.talk "Jarvis...", speaker: "You"
 		window.jarvis.talk "Yes?"
 		window.prompted = yes
-
-	commands =
-		'jarvis *stuff': execute
-		'travis *stuff': execute
-		'*garbage jarvis *stuff': execute
-		'*garbage travis *stuff': execute
-		'jarvis': getPrompted
-		'travis': getPrompted
-		'*garbage jarvis': getPrompted
-		'*garbage travis': getPrompted
-		'*stuff': (command) ->
-			if window.prompted
-				window.prompted = no
-				execute command
-				
+	
+	commands = {}
+	
+	names = ['jarvis', 'travis', 'Gervais', 'Java', 'dude']
+	for name in names
+		commands["#{name} *stuff"] = execute
+	for name in names
+		commands["*garbage #{name} *stuff"] = execute
+	for name in names
+		commands["#{name}"] = getPrompted
+	for name in names
+		commands["*garbage #{name}"] = getPrompted
+	# 4 loops for command priority
+	
+	
+	commands['*stuff'] = (command) ->
+		if window.prompted
+			window.prompted = no
+			execute command
+	
 	annyang.addCommands commands
 	
 	annyang.start()
